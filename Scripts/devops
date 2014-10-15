@@ -1,0 +1,20 @@
+#!/usr/bin/perl -w
+# user interface for access to development operations services
+#
+# Created using Paf , a perl application framework
+#
+
+use FindBin;
+
+use lib "$FindBin::RealBin/..";
+use lib "$FindBin::RealBin/../Externals";
+use lib "$FindBin::RealBin/../Externals/paf";
+use strict;
+
+use Paf::Cli::App;
+use Paf::Cli::Parser;
+use DevOps::Cli::Top;
+use DevOps::Config;
+
+my $app=Paf::Cli::App->new("DevOps::Config", "DevOps::Cli::Top");
+exit $app->parse(@ARGV);

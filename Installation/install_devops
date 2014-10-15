@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+#
+# DevOps Installation Script
+#
+# Usage :
+# perl install_devops [-perl perlexecutable] [-prefix install_prefix]
+#
+
+use FindBin;
+use Config;
+use strict;
+
+my $perl=$Config{perlpath};  # default - override with -perl option
+
+# process options
+my $exe_dir="/usr/local/bin";
+while ( $ARGV[0]=~"^-" ) {
+      if ( $ARGV[0]=~/-perl/ ) {
+         shift @ARGV;
+         $perl=shift @ARGV;
+         next;
+      }
+      if ( $ARGV[0]=~/-prefix/ ) {
+         shift @ARGV;
+         $exe_dir=shift @ARGV;
+         next;
+      }
+      my $rv=0;
+      if( $ARGV[0]!~/-h/ ) {
+          print "Unknown Option $ARGV[0]\n";
+          $rv=1;
+      }
+      print "Usage : perl install_devops [-perl perl_executable] [-prefix install_prefix]\n";
+      print "Where:\n";
+      print "\tinstall_prefix is the directory to install the script (default /usr/local/bin)";
+      print "\tperl_executable is the location of the perl executable (default $perl)";
+      exit $rv;
+} 
+
+my $thisdir=$FindBin::Bin;
+((my $basedir=$thisdir)=~s/(.*)\/.*/\1/);
+(my $topdir=$basedir)=~s/(.*)\/.*/\1/;
+my $exe=$exe_dir."/devops";
+my $devopswrapper=$thisdir."/devopswrapper";
+
+# Copy the wrapper file with the correct base variable installed
+open ( WRAP , "<$devopswrapper") or die "Unable to open $devopswrapper $!";
+open ( OUTFILE , ">$exe") or die "Unable to open $exe $!";
+while ( <WRAP> ) {
+ $_=~s/__basedir__/$basedir/g;
+ $_=~s/__perlexe__/$perl/g;
+ print OUTFILE $_;
+}
+chmod 0755, "$exe";
+close WRAP;

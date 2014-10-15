@@ -1,0 +1,33 @@
+#!__perlexe__
+# Wrap the main devops program 
+# Set up any system varibales required and process arguments
+# immediateley after devops
+
+$re='false';
+@args=@ARGV;
+for ( my $i=0; $i<=$#args; $i++ ) {
+   if ( $args[$i] eq "-re" ) { #Always request a User Return to exit the program
+	$re="true";
+	# cut it out of argument list passed down
+	splice(@args,$i,1);
+   }
+}
+
+# -- If not already set then point to current version
+if ( $ENV{DEVOPS_HOME} eq "" ) {
+ $ENV{DEVOPS_HOME}="__basedir__";
+}
+
+# -- The perl executable
+if ( $ENV{DEVOPSPERL} eq "" ) {
+ $ENV{DEVOPSPERL}="__perlexe__";
+}
+
+my $ret=system("$ENV{DEVOPSPERL}","$ENV{DEVOPS_HOME}/Scripts/devops", @args);
+
+# -- Dont just exit- ask the user first if -re option specified
+if ( $re eq 'true' ) {
+ print "\nPress RETURN to exit\n";
+ $junk=<STDIN>;
+}
+exit $ret/256;

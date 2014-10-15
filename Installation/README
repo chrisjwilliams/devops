@@ -1,0 +1,26 @@
+Welcome to devops
+-----------------
+Developed by Christopher Williams
+
+A tool representing a conglomeration of ideas I have produced in various tools
+for myself and various employers over the years.
+
+e.g. SCRAM (as used at CERN), mpp
+
+The main purpose is to:
+1) provide an easy to use command line interface to devops processes and workflows for the developer
+2) explicit dependency management 
+3) easy deployment and reproducability of complex development environments
+
+Installation
+------------
+You need :
+- Perl5 (v.5.10 minimum)
+
+Assuming that to be reading this you have checked out a copy of devops from 
+the devops repository. You can then continue with 
+
+1) cd Installation (this directory)
+2) ./install_devops (will default install to /usr/local/bin. Use -h option for help)
+
+Thats it - enjoy.
