@@ -140,7 +140,7 @@ sub test_task_code {
 
     my $project=DevOps::TestUtils::TestProject->new();
 
-    my $workflow="test_workflow";
+    my $workflow="build";
     my $task_name="test_task";
     my @code=qw(line_1 line_2 line_3);
     my $platform=new Paf::Platform::TestHost;

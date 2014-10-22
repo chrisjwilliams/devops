@@ -40,8 +40,8 @@ sub new {
     # -- task management node structure
     (my $node)=$self->{node}->search(new Paf::Configuration::NodeFilter("Workflows"));
     if(!defined $node) { $node=$self->{node}->new_child("Workflows"); }
-    ($self->{build_task})=$node->search(new Paf::Configuration::NodeFilter("Workflow", { name => "build" }));
-    if(!defined $self->{build_task}) { $self->{build_task}=$node->new_child("Workflow", { name => "build"} ); }
+    ($self->{workflows}{build})=$node->search(new Paf::Configuration::NodeFilter("Workflow", { name => "build" }));
+    if(!defined $self->{workflows}{build}) { $self->{workflows}{build}=$node->new_child("Workflow", { name => "build"} ); }
 
     $self->_load_sources();
 
@@ -164,27 +164,26 @@ sub task_code {
     my $variant=shift;  # optional - use undef
 
     my $task_node=$self->_task_node($workflow, $task_name);
+
+    # read in any workspace scoped environments, and task specific environments
+    my $env=DevOps::Environment->new();
+    foreach my $env_filter ( $self->_variant_sections("Env", $platform, $variant), new Paf::Configuration::NodeFilter("Env", {}) )
+    {
+        my @envs= $task_node->search($env_filter), $self->{workflows}{$workflow}->search($env_filter);
+        next, unless @envs;
+        foreach my $e ( @envs ) {
+            my $var_block=new DevOps::Configuration::VariableBlock($e);
+            $env->merge(new DevOps::Environment($var_block->vars()));
+        }
+    }
+
     foreach my $filter ( $self->_variant_sections("Code", $platform, $variant) )
     {
         my @actions=$task_node->search($filter);
         next, unless @actions;
 
         # -- best matching section found
-
-        my $env=DevOps::Environment->new();
-
-        # now we find any matching environments
-        foreach my $env_filter ( $self->_variant_sections("Env", $platform, $variant), new Paf::Configuration::NodeFilter("Env", {}) )
-        {
-            my @envs=$task_node->search($env_filter);
-            next, unless @envs;
-            foreach my $e ( @envs ) {
-                my $var_block=new DevOps::Configuration::VariableBlock($e);
-                $env->merge(new DevOps::Environment($var_block->vars()));
-            }
-        }
-
-        # -- expand variables in the commads and we are done
+        # -- expand variables in the commands and we are done
         my @code;
         my $action=$actions[0];
         foreach my $line ( @{$action->content()} ) {
@@ -220,9 +219,10 @@ sub _task_node {
     my $workflow=shift;
     my $task_name=shift;
 
-    (my $node)=$self->{build_task}->search(new Paf::Configuration::NodeFilter("Task", { name => $task_name } ));
+    die "unknown workflow $workflow", if( ! defined $self->{workflows}{$workflow} );
+    (my $node)=$self->{workflows}{$workflow}->search(new Paf::Configuration::NodeFilter("Task", { name => $task_name } ));
     if(! defined $node ) {
-        $node=$self->{build_task}->new_child("Task", { name => $task_name });
+        $node=$self->{workflows}{$workflow}->new_child("Task", { name => $task_name });
     }
     return $node;
 }
