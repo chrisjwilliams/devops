@@ -30,7 +30,7 @@ sub new {
     $self->{config_path}=Paf::File::SearchPath->new( $self->config_dir(), "/usr/local/share/devops", "/usr/share/devops");
     $self->{config_file}=Paf::Configuration::IniFile->new($self->{config_path}->find("config.ini"));
 
-    	return $self;
+    return $self;
 }
 
 sub _config_file {
