@@ -81,6 +81,7 @@ sub build_workspace {
     my $task_list=shift;
     my $platform=shift || $self->_localhost();
     my $variants=shift || {};
+    my $verbose=shift||0;
 
     # -- check variants type is defined and set a default
     if( ! defined $variants->{type} ) {
@@ -104,7 +105,7 @@ sub build_workspace {
     foreach my $dep ( $workspace->dependencies() ) {
         if( defined (my $loc=$workspace->workspace_dependency($dep)) ) {
             # -- find the appropriate build area environment
-            my $dep_ws=$self->get_workspace_manager()->get_workspace_from_location($loc);
+            my $dep_ws=$wm->get_workspace_from_location($loc);
             if( !defined $dep_ws ) {
                 die "unable to find workspace at $loc\n";
             }
@@ -137,16 +138,16 @@ sub build_workspace {
     foreach my $task_name ( $workspace->build_tasks() ) {
         my $task=new Paf::Platform::Task($platform);
         foreach my $line ( $workspace->build_commands($task_name, $platform, $variants) ) {
-            $task->add($env->expandString($line));
+            print "task $task_name: ",$line, "\n", if( $verbose > 2 );
+            $line=$env->expandString($line);
+            print "task $task_name: ",$line, "\n", if( $verbose > 1 );
+            $task->add($line);
         }
         $task_series->add_task( $task_name, $task );
     }
 
     # -- execute all our tasks
-    my $report=$build_area->execute_sequence("build", $task_series, $stop_task);
-    if( $report->has_failed() ) {
-        print $report->error();
-    }
+    my $report=$build_area->execute_sequence("build", $task_series, $stop_task, $verbose);
     return $report;
 }
 

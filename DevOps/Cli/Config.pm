@@ -18,6 +18,7 @@ sub new {
 	my $class=shift;
 
 	my $self=$class->SUPER::new(@_);
+	return $self;
 }
 
 sub name {

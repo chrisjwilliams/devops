@@ -6,9 +6,9 @@ use Carp;
 
 sub new {
     my $class=shift;
-    my $self={};
-    $self->{api}=shift;
-    bless $self, $class;
+    my $api=shift;
+	my $self=$class->SUPER::new(@_);
+    $self->{api}=$api;
     return $self;
 }
 
@@ -17,6 +17,11 @@ sub current_workspace {
 
     my $wm=$self->{api}->get_workspace_manager();
     return $wm->current_workspace();
+}
+
+sub verbose_level {
+    my $self=shift;
+    return $self->{parent}->verbose_level(@_);
 }
 
 sub get_projects {

@@ -41,10 +41,14 @@ sub run {
     my $ws=$self->current_workspace();
     if( $ws ) {
         # -- parse the command line arguments
-        $self->{api}->build_workspace($ws, [ @_ ], undef, $self->{variants});
+        my $report=$self->{api}->build_workspace($ws, [ @_ ], undef, $self->{variants}, $self->verbose_level());
+        if( $self->verbose_level() ) {
+            $report->print();
+        }
+        return $report->has_failed();
     }
     else {
-        $self->error("unable to determine workspace to build");
+        return $self->error("unable to determine workspace to build");
     }
 }
 

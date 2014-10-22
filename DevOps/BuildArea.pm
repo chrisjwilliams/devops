@@ -120,6 +120,7 @@ sub execute_sequence {
     my $sequence_name=shift || die ("expecting a sequence name");
     my $task_manager=shift || die ("expecting a task manager");
     my $stop_task=shift; # optional task to halt at in sequence
+    my $verbose=shift||0;
 
     # -- restore any reports from previos, so we know what needs to be run
     my $report_filename=$self->{info_location}."/$sequence_name.reports";
@@ -143,7 +144,7 @@ sub execute_sequence {
             return $report;
         });
 
-    my $report=$task_manager->execute($stop_task);
+    my $report=$task_manager->execute($stop_task, $verbose);
 
     foreach my $log ( @logs ) {
         $log->close();

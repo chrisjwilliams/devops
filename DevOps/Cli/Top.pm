@@ -10,14 +10,14 @@ use DevOps::Cli::Import;
 use DevOps::Cli::Project;
 use DevOps::Cli::List;
 use DevOps::Cli::Checkout;
+use DevOps::Cli::VerboseOption;
 use Carp;
 1;
 
 sub new {
     my $class=shift;
-    my $self={};
     my $config=shift;
-    bless $self, $class;
+	my $self=$class->SUPER::new(@_);
 
     my $api=DevOps::Api->new($config);
 
@@ -29,7 +29,17 @@ sub new {
                     DevOps::Cli::Dependency->new($api),
                     DevOps::Cli::List->new($api),
                     DevOps::Cli::Checkout->new($api));
+
+    # -- top level options
+    $self->{verbose_opt}=DevOps::Cli::VerboseOption->new();
+    $self->add_options($self->{verbose_opt});
+
     return $self;
+}
+
+sub verbose_level {
+    my $self=shift;
+    return $self->{verbose_opt}->level(@_);
 }
 
 sub synopsis {
