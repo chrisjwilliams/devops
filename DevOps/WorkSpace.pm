@@ -17,6 +17,7 @@ use DevOps::EnvironmentManager;
 use strict;
 use Paf::Configuration::XmlFile;
 use Carp;
+use Cwd 'abs_path';
 use Scalar::Util;
 1;
 
@@ -37,6 +38,8 @@ sub reset {
     my $self=shift;
 
     $self->{location}=shift||die "no location passed for workdir";
+    $self->{location}=Cwd::abs_path($self->{location});
+
     die "location does not exist", if( ! -d $self->{location} );
 
     $self->{checkout_location}=$self->{location}."/checkout";
@@ -248,6 +251,15 @@ sub set_dependent_workspace {
     my $workspaces=$self->{node}->get_child(new Paf::Configuration::NodeFilter("Workspaces"));
     my $node=$workspaces->get_child(new Paf::Configuration::NodeFilter("Workspace", { uid => $dep->uid() } ));
     $node->add_meta( "location", $workspace->{location} );
+    return 0;
+}
+
+sub unset_dependent_workspace {
+    my $self=shift;
+    my $dep=shift|| carp("no dependency provided");
+    (my $node)=$self->{node}->search(new Paf::Configuration::NodeFilter("Workspaces"), new Paf::Configuration::NodeFilter("Workspace", { uid => $dep->uid() } ));
+    if( $node ) { $node->unhook() }
+    return 0;
 }
 
 sub workspace_dependency {

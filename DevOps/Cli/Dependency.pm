@@ -14,7 +14,9 @@ use parent "DevOps::Cli::Command";
 use DevOps::Cli::DependencyAdd;
 use DevOps::Cli::DependencyList;
 use DevOps::Cli::DependencyRemove;
+use DevOps::Cli::DependencyReset;
 use DevOps::Cli::DependencyResolve;
+use DevOps::Cli::DependencyUse;
 use strict;
 1;
 
@@ -26,9 +28,11 @@ sub new {
 	my $self=$class->SUPER::new(@_);
 
     $self->add_cmds(DevOps::Cli::DependencyAdd->new($self->{api}),
+                    DevOps::Cli::DependencyUse->new($self->{api}),
                     DevOps::Cli::DependencyList->new($self->{api}),
                     DevOps::Cli::DependencyRemove->new($self->{api}),
-                    DevOps::Cli::DependencyResolve->new($self->{api}));
+                    DevOps::Cli::DependencyResolve->new($self->{api}),
+                    DevOps::Cli::DependencyReset->new($self->{api}));
 	return $self;
 }
 

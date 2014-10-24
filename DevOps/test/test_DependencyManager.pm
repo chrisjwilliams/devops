@@ -25,7 +25,7 @@ sub test_dependencies {
     my $version="version_1";
     my $name_2="name_2";
     my $version_2="version_2";
-    my $dep=DevOps::Dependency->new( $name_2, $version_2);
+    my $dep=DevOps::Dependency->new( new Paf::Configuration::Node("", { name=>$name_2, version=>$version_2} ));
 
     my $config=Paf::Configuration::Node->new("test");
 

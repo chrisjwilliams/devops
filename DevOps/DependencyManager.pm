@@ -38,13 +38,15 @@ sub add {
     my $version=shift || carp("version not specified");
 
     if(! defined $self->{deps}{$name}{$version} ) {
-        $self->{deps}{$name}{$version}=DevOps::Dependency->new($name, $version);
+        my $dep_node=$self->{node}->get_child(new Paf::Configuration::NodeFilter("dependency", { name => $name, version => $version } ));
+        $self->{deps}{$name}{$version}=DevOps::Dependency->new($dep_node);
     }
 }
 
 sub add_dependencies {
     my $self=shift;
     foreach my $dep ( @_ ) {
+        $dep->config()->set_name("dependency");
         $self->{deps}{$dep->name()}{$dep->version()}=$dep;
     }
 }
@@ -87,8 +89,10 @@ sub remove_dependencies {
 sub save {
     my $self=shift;
     $self->{config}->clear();
+    $self->{node}->reset();
     foreach my $dep ( $self->dependencies() ) {
-        $self->{config}->set_var($dep->name(), $dep->version());
+        $self->{node}->add_children($dep->config());
+        #$self->{config}->set_var($dep->name(), $dep->version());
     }
     $self->{config}->save();
 }
@@ -97,7 +101,14 @@ sub save {
 
 sub _read {
     my $self=shift;
+
+    # -- name=version pairs
     foreach my $key ( keys %{$self->{config}->vars()} ) {
         $self->add($key, $self->{config}->value($key));
+    }
+
+    # -- dependency nodes
+    foreach my $dep ( $self->{node}->search(new Paf::Configuration::NodeFilter("dependency")) ) {
+        $self->add_dependencies(new DevOps::Dependency($dep));
     }
 }

@@ -27,21 +27,18 @@ sub new {
     if( ! defined $self->devops_version() ) { die ("must specify <DevOps version=\"0.0.0\"> in ", $self->{project_file}); }
 
     # DependencyManager
-    my $dep_config=$self->{node}->get_child(new Paf::Configuration::NodeFilter("DependencyManager"));
+    my $dep_config=$self->{node}->get_child(new Paf::Configuration::NodeFilter("dependencies"));
     $self->{deps}=DevOps::DependencyManager->new($dep_config);
 
     # EnvironmentManager
-    (my $env_config)=$self->{node}->search(new Paf::Configuration::NodeFilter("EnvironmentManager"));
-    if( ! defined $env_config ) {
-        $env_config=$self->{node}->new_child("EnvironmentManager");
-    }
+    my $env_config=$self->{node}->get_child(new Paf::Configuration::NodeFilter("EnvironmentManager"));
     $self->{env}=DevOps::EnvironmentManager->new($env_config);
 
     # -- task management node structure
-    (my $node)=$self->{node}->search(new Paf::Configuration::NodeFilter("Workflows"));
-    if(!defined $node) { $node=$self->{node}->new_child("Workflows"); }
-    ($self->{workflows}{build})=$node->search(new Paf::Configuration::NodeFilter("Workflow", { name => "build" }));
-    if(!defined $self->{workflows}{build}) { $self->{workflows}{build}=$node->new_child("Workflow", { name => "build"} ); }
+    (my $node)=$self->{node}->search(new Paf::Configuration::NodeFilter("workflows"));
+    if(!defined $node) { $node=$self->{node}->new_child("workflows"); }
+    ($self->{workflows}{build})=$node->search(new Paf::Configuration::NodeFilter("workflow", { name => "build" }));
+    if(!defined $self->{workflows}{build}) { $self->{workflows}{build}=$node->new_child("workflow", { name => "build"} ); }
 
     $self->_load_sources();
 

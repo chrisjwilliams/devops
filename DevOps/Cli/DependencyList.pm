@@ -35,7 +35,9 @@ sub run {
     my $ws=$self->current_workspace();
     if( defined $ws ) {
         foreach my $dep ( $ws->dependencies() ) {
-            print $dep->name(), " ", $dep->version(), "\n";
+            my $loc=$ws->workspace_dependency($dep);
+            print $dep->name(), " ", $dep->version(), " (", ($dep->is_required()?"required":"optional"), 
+                  ")", ($loc?" using workspace at '$loc'":""),  "\n";
         }
     }
     else {

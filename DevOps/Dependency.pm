@@ -20,11 +20,22 @@ sub new {
 
 	my $self={};
 	bless $self, $class;
-    $self->{name}=shift;
-    $self->{version}=shift;
-    $self->{required}=shift||1;
+    my $config=shift;
+    die "Dependency not passed a config node", if( ! defined $config );
+    if( ref($config) ne "Paf::Configuration::Node" ) {
+        $config=new Paf::Configuration::Node("dependency", { name => $config, version => shift, required => shift||1 });
+    }
+    $self->{config}=$config;
+    $self->{name}=$config->meta()->{name};
+    $self->{version}=$config->meta()->{version}||"undefined";
+    $self->{required}=$config->meta()->{required}||1;
 
 	return $self;
+}
+
+sub config {
+    my $self=shift;
+    return $self->{config};
 }
 
 sub name {
