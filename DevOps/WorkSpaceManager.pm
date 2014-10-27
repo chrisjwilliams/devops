@@ -15,6 +15,7 @@ use strict;
 use Carp;
 use Cwd;
 use File::Basename;
+use File::Path;
 use Storable;
 1;
 
@@ -83,7 +84,7 @@ sub construct_workspace
         $location=$self->{base}."/".$project_id->name()."_".$project_id->version();
     }
     if( ! -d $location ) {
-        mkdir $location || die("unable to construct workspace ", $location);
+        mkpath $location || die("unable to construct workspace ", $location);
     }
     my $workspace=new DevOps::WorkSpace($location);
     $workspace->construct($project);
