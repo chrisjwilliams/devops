@@ -32,13 +32,24 @@ sub name {
 }
 
 sub synopsis {
-    return "build the current project"
+    return "build the current project (or specify the project name/version to build)"
 }
 
 sub run {
     my $self=shift;
 
     my $ws=$self->current_workspace();
+    if( ! $ws ) {
+        # -- maybe the arguments specify the project to build
+        my $name=shift;
+        my $version=shift;
+        if( $name && $version ) {
+            ($ws)=$self->{api}->find_workspaces($name, $version);
+            if( ! $ws ) {
+                return $self->error("unable to find workspace for project '$name' version '$version'");
+            }
+        }
+    }
     if( $ws ) {
         # -- parse the command line arguments
         my $report=$self->{api}->build_workspace($ws, [ @_ ], undef, $self->{variants}, $self->verbose_level());
