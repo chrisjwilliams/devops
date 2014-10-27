@@ -164,7 +164,7 @@ sub task_code {
 
     # read in any workspace scoped environments, and task specific environments
     my $env=DevOps::Environment->new();
-    foreach my $env_filter ( $self->_variant_sections("env", $platform, $variant), new Paf::Configuration::NodeFilter("environment", {}) )
+    foreach my $env_filter ( $self->_variant_sections("environment", $platform, $variant), new Paf::Configuration::NodeFilter("environment", {}) )
     {
         my @envs= $task_node->search($env_filter), $self->{workflows}{$workflow}->search($env_filter);
         next, unless @envs;
