@@ -143,5 +143,17 @@ sub importer_plugins {
     return $self->{importer_path};
 }
 
+sub workspace_manager_data {
+    my $self=shift;
+    if(@_) {
+        $self->{workspace_mgr_data}=shift;
+    }
+    if(!defined $self->{workspace_mgr_data})
+    {
+        $self->{workspace_mgr_data}=$self->config_dir()."/workspace.db";
+    }
+    return $self->{workspace_mgr_data};
+}
+
 # -- private methods -------------------------
 

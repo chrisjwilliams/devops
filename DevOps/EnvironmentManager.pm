@@ -62,7 +62,7 @@ sub save {
     {
         my $vars=$self->{env}{$env_name}->env();
         (my $node)=$self->_env_nodes($env_name);
-        $node=$self->{node}->new_child("Environment", { name => $env_name }), if( ! defined $node );
+        $node=$self->{node}->new_child("environment", { name => $env_name }), if( ! defined $node );
         my $v_block=new DevOps::Configuration::VariableBlock($node);
 
         foreach my $var ( sort(keys %$vars) ) {
@@ -76,6 +76,6 @@ sub save {
 sub _env_nodes {
     my $self=shift;
     my $name=shift;
-    return $self->{node}->search(new Paf::Configuration::NodeFilter("Environment", { name => $name }));
+    return $self->{node}->search(new Paf::Configuration::NodeFilter("environment", { name => $name }));
 }
 

@@ -47,6 +47,14 @@ sub get_workspace
     return $self->{ws}{$key}, if(defined $self->{ws}{$key});
 
     my $location=$self->{locations}{$key};
+    if( ! defined $location ) {
+        # search for matching keys
+        foreach my $uid_key ( keys %{$self->{locations}} ) {
+            next, unless $project_id->match(new DevOps::ProjectId($uid_key));
+            $location = $self->{locations}{$uid_key};
+            last;
+        }
+    }
     if( defined $location )
     {
         if(! -d $location ) {
@@ -56,8 +64,7 @@ sub get_workspace
         else
         {
             # ---- return the pre-exisitng object
-            $self->{ws}{$key}=new DevOps::WorkSpace($location);
-            return $self->{ws}{$key};
+            return $self->_add_workspace(new DevOps::WorkSpace($location));
         }
     }
     return undef;
@@ -67,11 +74,14 @@ sub construct_workspace
 {
     my $self=shift;
     my $project=shift || die "expecting a project";
+    my $location=shift;
 
     my $project_id=$project->id();
     my $key=$project_id->serialize();
 
-    my $location=$self->{base}."/".$project_id->name()."_".$project_id->version();
+    if( ! defined $location ) {
+        $location=$self->{base}."/".$project_id->name()."_".$project_id->version();
+    }
     if( ! -d $location ) {
         mkdir $location || die("unable to construct workspace ", $location);
     }
@@ -145,8 +155,11 @@ sub get_workspace_from_location {
     my $self=shift;
     my $location=shift || die "expecting a location";
 
-    my $workspace=new DevOps::WorkSpace($location);
-    return $self->_add_workspace($workspace);
+    if( -d $location ) {
+        my $workspace=new DevOps::WorkSpace($location);
+        return $self->_add_workspace($workspace);
+    }
+    return undef;
 }
     
 # -- private methods -------------------------

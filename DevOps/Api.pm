@@ -37,13 +37,18 @@ sub import
 sub resolve_workspace_deps {
     my $self=shift;
     my $workspace=shift;
+    my $verbose=shift||0;
     
     my $wm=$self->get_workspace_manager();
-    foreach my $dep ( $workspace->dependencies() ) {
+    foreach my $dep ( $workspace->unresolved_dependencies() ) {
         (my $dep_ws)=$self->find_workspaces($dep->name(), $dep->version());
         if( defined $dep_ws ) {
             # - we found the dependency
+            print "found workspace for ", $dep->name(), " " , $dep->version(), " at ", $dep_ws->location(), "\n",  if( $verbose );
             $workspace->set_dependent_workspace($dep, $dep_ws);
+        }
+        else {
+            print "no workspace found for dependency ", $dep->name(), " " , $dep->version(), "\n", if( $verbose );
         }
     }
 }
@@ -68,7 +73,7 @@ sub get_workspace_manager
     my $self=shift;
     if(! defined $self->{wm})
     {
-        $self->{wm}=DevOps::WorkSpaceManager->new($self->{config}->config_dir()."/workspace.db", $self->{config}->workspace_dir());
+        $self->{wm}=DevOps::WorkSpaceManager->new($self->{config}->workspace_manager_data(), $self->{config}->workspace_dir());
     }
     return $self->{wm};
 }
@@ -159,6 +164,7 @@ sub setup_workspace {
     my $self=shift;
     my $name=shift;
     my $version=shift;
+    my $location=shift; # optional
 
     # -- check we are not already in a workspace
     my $wm=$self->get_workspace_manager();
@@ -172,15 +178,21 @@ sub setup_workspace {
         die "refusing to construct a workspace inside another";
         return undef;
     }
-
     my $pm=$self->get_project_manager();
     (my $pid)=$pm->list( { "name" => $name, "version" => $version } );
     if(defined $pid) {
-        my $ws=$wm->get_workspace($pid);
+        my $ws;
+        if( defined $location ) {
+            # -- don't build over an already existing workspace
+            $ws=$wm->get_workspace_from_location($location);
+        }
+        else {
+            $ws=$wm->get_workspace($pid);
+        }
         if( ! defined $ws ) {
 
             # -- we need to create the workspace
-            $ws=$wm->construct_workspace($pm->get($pid));
+            $ws=$wm->construct_workspace($pm->get($pid), $location);
 
             # -- create the src directory
             $self->checkout_src($ws);

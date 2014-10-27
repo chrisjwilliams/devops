@@ -164,7 +164,7 @@ sub task_code {
 
     # read in any workspace scoped environments, and task specific environments
     my $env=DevOps::Environment->new();
-    foreach my $env_filter ( $self->_variant_sections("Env", $platform, $variant), new Paf::Configuration::NodeFilter("Env", {}) )
+    foreach my $env_filter ( $self->_variant_sections("env", $platform, $variant), new Paf::Configuration::NodeFilter("environment", {}) )
     {
         my @envs= $task_node->search($env_filter), $self->{workflows}{$workflow}->search($env_filter);
         next, unless @envs;
@@ -174,7 +174,7 @@ sub task_code {
         }
     }
 
-    foreach my $filter ( $self->_variant_sections("Code", $platform, $variant) )
+    foreach my $filter ( $self->_variant_sections("code", $platform, $variant) )
     {
         my @actions=$task_node->search($filter);
         next, unless @actions;
@@ -184,10 +184,9 @@ sub task_code {
         my @code;
         my $action=$actions[0];
         foreach my $line ( @{$action->content()} ) {
-            $line=$env->expandString($line);
-            push @code, $line;
+            my $exline=$env->expandString($line);
+            push @code, $exline;
         }
-
         return @code;
     }
     return ();
@@ -205,9 +204,9 @@ sub add_task_code {
     my $task_node=$self->_task_node($workflow, $task_name);
 
     # -- store in the most specialized section
-    (my $section)=$self->_variant_sections("Code", $platform, $variant);
+    (my $section)=$self->_variant_sections("code", $platform, $variant);
     (my $node)=$task_node->search($section);
-    if(!defined $node) { $node=$task_node->new_child("Code", $section->meta()); }
+    if(!defined $node) { $node=$task_node->new_child("code", $section->meta()); }
     $node->add_content(@_);
 }
 
@@ -217,9 +216,9 @@ sub _task_node {
     my $task_name=shift;
 
     die "unknown workflow $workflow", if( ! defined $self->{workflows}{$workflow} );
-    (my $node)=$self->{workflows}{$workflow}->search(new Paf::Configuration::NodeFilter("Task", { name => $task_name } ));
+    (my $node)=$self->{workflows}{$workflow}->search(new Paf::Configuration::NodeFilter("task", { name => $task_name } ));
     if(! defined $node ) {
-        $node=$self->{workflows}{$workflow}->new_child("Task", { name => $task_name });
+        $node=$self->{workflows}{$workflow}->new_child("task", { name => $task_name });
     }
     return $node;
 }

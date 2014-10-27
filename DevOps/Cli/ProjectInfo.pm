@@ -28,6 +28,7 @@ sub run {
     foreach my $project ( @projects ) {
         print $project->name(), " ", $project->version(), " :\n";
         print "\tlocation=\"", $project->location(), "\"\n";
+        print "\tid=\"", $project->id()->serialize(), "\"\n";
     }
     return 0;
 }

@@ -19,7 +19,7 @@ use strict;
 
 sub new {
 	my $class=shift;
-    my $uid=shift;
+    my $uid=shift||die "expecting an identifier";
 
 	my $self={};
 	bless $self, $class;
@@ -27,6 +27,7 @@ sub new {
     if( ! blessed($uid) )
     {
         $self->{uid}=new Paf::DataStore::Uid($uid);
+        confess ("unable to determine project id"), if( ! defined $self->{uid} );
     }
     else {
         $self->{uid}=$uid;

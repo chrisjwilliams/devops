@@ -29,6 +29,7 @@ sub new {
     my $workspace_dir=$self->{tmpdir}->dir()."/workspaces";
     mkdir $workspace_dir or die "unable to make $workspace_dir : $!";
     $self->{config}->set_workspace_dir($workspace_dir);
+    $self->{config}->workspace_manager_data($self->{tmpdir}->dir()."/workspace.db");
     
     return $self;
 }

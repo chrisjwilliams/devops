@@ -196,10 +196,17 @@ sub test_workspace_dependencies {
 
         # -- correct dependency
         $ws->add_dependencies($dep2);
+        my @unresolved=$ws->unresolved_dependencies();
+        die "expecting 2 unresolved dependencies", unless (scalar @unresolved == 2);
+
         $ws->set_dependent_workspace($dep2, $ws2);
 
+        
         my $dep_ws=$ws->workspace_dependency($dep2);
         die("unexpected workspace"), unless( $dep_ws eq $ws2_location );
+
+        @unresolved=$ws->unresolved_dependencies();
+        die "expecting 1 unresolved dependency", unless (scalar @unresolved == 1);
         
     }
 

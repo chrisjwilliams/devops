@@ -301,6 +301,18 @@ sub dependencies {
     return $self->project()->dependencies();
 }
 
+sub unresolved_dependencies {
+    my $self=shift;
+
+    my @deps=();
+    foreach my $dep ( $self->dependencies() ) {
+        if( ! defined $self->workspace_dependency($dep) ) {
+            push @deps, $dep;
+        }
+    }
+    return @deps;
+}
+
 sub save {
     my $self=shift;
 

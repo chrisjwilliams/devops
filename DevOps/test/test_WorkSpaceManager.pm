@@ -53,6 +53,7 @@ sub test_construct_workspace {
     my $tmpdir=Paf::File::TempDir->new();
     my $tmpfile=Paf::File::TempFile->new();
     my $project=DevOps::TestUtils::TestProject->new();
+    my $project2=DevOps::TestUtils::TestProject->new("project_2");
     my $location=$tmpdir->dir()."/".$project->name()."_".$project->version();
     {
         my $wm=DevOps::WorkSpaceManager->new($tmpfile->filename(), $tmpdir->dir());
@@ -68,6 +69,8 @@ sub test_construct_workspace {
         die("expecting is_constructed() true"), unless ($ws->is_constructed());
         
         die("expecting to find $location"), unless ( -d $location );
+
+        my $ws2=$wm->construct_workspace($project2);
     }
 
     # -- check persistency
@@ -75,6 +78,9 @@ sub test_construct_workspace {
     my $ws=$wm->get_workspace($project->id());
     die("expecting is_constructed() true"), unless ($ws->is_constructed());
     die("unexpected project id"), unless ( $ws->project_id()->match($project->id()) );
+    my $ws2=$wm->get_workspace($project2->id());
+    die("expecting is_constructed() true"), unless ($ws2->is_constructed());
+    die("unexpected project id"), unless ( $ws2->project_id()->match($project2->id()) );
 
 }
 

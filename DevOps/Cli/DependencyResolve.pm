@@ -35,7 +35,7 @@ sub run {
 
     my $ws=$self->current_workspace();
     if( defined $ws ) {
-        $self->{api}->resolve_workspace_deps($ws);
+        $self->{api}->resolve_workspace_deps($ws, $self->verbose_level());
     }
     else {
         return $self->error("unable to determine the current project");

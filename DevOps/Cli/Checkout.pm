@@ -31,11 +31,12 @@ sub run {
     my $self=shift;
     my $name=shift;
     my $version=shift;
+    my $location=shift; # optional
 
     if( ! defined $name ) { return $self->error("no name specified") };
     if( ! defined $version ) { return $self->error("no version specified") };
 
-    my $ws=$self->{api}->setup_workspace($name, $version);
+    my $ws=$self->{api}->setup_workspace($name, $version, $location);
     if( ! defined $ws ) {
         return $self->error("error setting up workspace for $name $version : $!");
     }
