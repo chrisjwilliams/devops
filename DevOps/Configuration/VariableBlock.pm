@@ -58,7 +58,7 @@ sub save {
     if( $self->{need_save} ) {
         $self->{node}->clear_content();
         foreach my $var ( keys %{$self->{vars}} ) {
-            my $val=$self->{vars}{$var};
+            (my $val=$self->{vars}{$var})=~s/"/\\"/g;
             $self->{node}->add_content($var.'="'.$val.'"'."\n");
         }
         $self->{need_save}=0;
@@ -82,7 +82,7 @@ sub read {
             my $var=$1;
             my $val=$2;
             if ( $val=~/^\s*"(.+)\"\s*$/o ) {
-                $val=$1;
+                ($val=$1)=~s/\\"/"/g;
             }
             $self->{vars}{$var}=$val;
         }
