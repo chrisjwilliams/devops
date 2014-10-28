@@ -81,7 +81,7 @@ sub construct_workspace
     my $key=$project_id->serialize();
 
     if( ! defined $location ) {
-        $location=$self->{base}."/".$project_id->name()."_".$project_id->version();
+        $location=$self->{base}."/".$project_id->name()."/".$project_id->version();
     }
     if( ! -d $location ) {
         mkpath $location || die("unable to construct workspace ", $location);

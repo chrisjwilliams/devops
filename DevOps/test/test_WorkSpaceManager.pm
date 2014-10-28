@@ -54,7 +54,7 @@ sub test_construct_workspace {
     my $tmpfile=Paf::File::TempFile->new();
     my $project=DevOps::TestUtils::TestProject->new();
     my $project2=DevOps::TestUtils::TestProject->new("project_2");
-    my $location=$tmpdir->dir()."/".$project->name()."_".$project->version();
+    my $location=$tmpdir->dir()."/".$project->name()."/".$project->version();
     {
         my $wm=DevOps::WorkSpaceManager->new($tmpfile->filename(), $tmpdir->dir());
 
