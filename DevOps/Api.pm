@@ -122,6 +122,7 @@ sub build_workspace {
 
     $env->merge($self->get_environment($workspace, "export", $platform));
     #$env->merge_namespace( [ "platform" ], new DevOps::Environment($platform->environment()) );
+    print $env->dump(), "\n", if( $verbose > 1 );
 
     # -- build a task list
     my $stop_task;
@@ -195,7 +196,7 @@ sub setup_workspace {
             $ws=$wm->construct_workspace($pm->get($pid), $location);
 
             # -- create the src directory
-            $self->checkout_src($ws);
+            my $status=$self->checkout_src($ws);
 
             # -- resolve dependencies
             $self->resolve_workspace_deps($ws);

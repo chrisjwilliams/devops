@@ -11,6 +11,7 @@
 
 package DevOps::Cli::ConfigAdd;
 use parent "DevOps::Cli::Command";
+use Paf::Cli::Argument;
 use strict;
 1;
 
@@ -19,6 +20,7 @@ use strict;
 sub new {
 	my $class=shift;
 	my $self=$class->SUPER::new(@_);
+    $self->add_argument(new Paf::Cli::Argument("path", "A path to a directory containing project descriptions"));
 
 	return $self;
 }

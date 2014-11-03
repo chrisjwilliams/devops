@@ -11,6 +11,7 @@
 
 package DevOps::Cli::DependencyRemove;
 use parent "DevOps::Cli::Command";
+use Paf::Cli::Argument;
 use strict;
 1;
 
@@ -20,6 +21,8 @@ sub new {
 	my $class=shift;
 
 	my $self=$class->SUPER::new(@_);
+    $self->add_argument(new Paf::Cli::Argument("dependency_name", "the name of the dependancy to remove"));
+    $self->add_argument(new Paf::Cli::Argument("dependency_version", "the version of the dependancy to remove"));
 	return $self;
 }
 

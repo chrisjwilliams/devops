@@ -11,6 +11,7 @@
 
 package DevOps::Cli::DependencyReset;
 use parent "DevOps::Cli::Command";
+use Paf::Cli::Argument;
 use strict;
 1;
 
@@ -19,15 +20,13 @@ use strict;
 sub new {
 	my $class=shift;
 	my $self=$class->SUPER::new(@_);
+    $self->add_argument(new Paf::Cli::Argument("dependency_name", "the name of the dependancy to reset"));
+    $self->add_argument(new Paf::Cli::Argument("dependency_version", "the version of the dependancy to reset"));
 	return $self;
 }
 
 sub synopsis {
     return "remove any workspaces assoicated with the specifed dependency\n"
-}
-
-sub help {
-    return "dep_name dep_version\n"
 }
 
 sub name {

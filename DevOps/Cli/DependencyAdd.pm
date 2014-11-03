@@ -10,6 +10,7 @@
 # -----------------------------------------------
 
 package DevOps::Cli::DependencyAdd;
+use Paf::Cli::Argument;
 use parent "DevOps::Cli::Command";
 use strict;
 1;
@@ -19,6 +20,8 @@ use strict;
 sub new {
 	my $class=shift;
 	my $self=$class->SUPER::new(@_);
+    $self->add_argument(new Paf::Cli::Argument("dependency_name", "the name of the dependancy to add"));
+    $self->add_argument(new Paf::Cli::Argument("dependency_version", "the version of the dependancy to add"));
 	return $self;
 }
 

@@ -10,6 +10,8 @@
 # -----------------------------------------------
 
 package DevOps::Cli::DependencyUse;
+use Paf::Cli::Argument;
+use Paf::Cli::OptionalArgument;
 use parent "DevOps::Cli::Command";
 use strict;
 1;
@@ -19,15 +21,14 @@ use strict;
 sub new {
 	my $class=shift;
 	my $self=$class->SUPER::new(@_);
+    $self->add_argument(new Paf::Cli::Argument("workspace_location", "The path to the devops workspace that should be used to satisfy a dependency" ));
+    $self->add_argument(new Paf::Cli::OptionalArgument("dependency_name", "dependency name to satisfy" ));
+    $self->add_argument(new Paf::Cli::OptionalArgument("dependency_version", "dependency version to satisfy" ));
 	return $self;
 }
 
 sub synopsis {
     return "resolve the specifed dependency with a devops workspace at the speccified location\n"
-}
-
-sub help {
-    return "<workspace_directory> [dep_name, dep_version]\n"
 }
 
 sub name {
