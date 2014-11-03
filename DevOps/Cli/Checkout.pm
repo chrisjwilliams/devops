@@ -11,6 +11,8 @@
 
 package DevOps::Cli::Checkout;
 use parent "DevOps::Cli::Command";
+use Paf::Cli::Argument;
+use Paf::Cli::OptionalArgument;
 use strict;
 1;
 
@@ -20,6 +22,9 @@ sub new {
 	my $class=shift;
 
     my $self=$class->SUPER::new(@_);
+    $self->add_argument(new Paf::Cli::Argument("name", "the name of the project to check out"));
+    $self->add_argument(new Paf::Cli::Argument("version", "the version of the project to check out"));
+    $self->add_argument(new Paf::Cli::OptionalArgument("location", "the direction to create the workspace in"));
 	return $self;
 }
 
