@@ -114,9 +114,11 @@ sub build_workspace {
             if( !defined $dep_ws ) {
                 die "unable to find workspace at $loc\n";
             }
-            my $dep_build_out=$workspace->search_build_out($platform, $variants);
-            $env->merge_namespace( [ $dep->name(), $dep->version()], $dep_build_out->env());
-            $env->merge_namespace( [ $dep->name() ], $dep_build_out->env());
+            my $dep_build_out=$dep_ws->search_build_out($platform, $variants);
+            if( defined $dep_build_out ) {
+                $env->merge_namespace( [ $dep->name(), $dep->version()], $dep_build_out->env());
+                $env->merge_namespace( [ $dep->name() ], $dep_build_out->env());
+            }
         }
     }
 
