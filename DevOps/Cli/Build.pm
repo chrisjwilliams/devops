@@ -11,6 +11,8 @@
 
 package DevOps::Cli::Build;
 use parent "DevOps::Cli::Command";
+use Paf::Cli::Argument;
+use Paf::Cli::OptionalArgument;
 use strict;
 1;
 
@@ -23,6 +25,8 @@ sub new {
 
     # -- set some default variants
     $self->{variants} = { toolchain => [ qw(gcc) ] };
+    $self->add_argument(new Paf::Cli::OptionalArgument("project_name", "specify the name of the project to build (outside of a project workspace)"));
+    $self->add_argument(new Paf::Cli::OptionalArgument("project_version", "specify the version of the project to build (outside of a project workspace)"));
 
 	return $self;
 }
@@ -32,7 +36,7 @@ sub name {
 }
 
 sub synopsis {
-    return "build the current project (or specify the project name/version to build)"
+    return "build the current project (or that specified)"
 }
 
 sub run {
