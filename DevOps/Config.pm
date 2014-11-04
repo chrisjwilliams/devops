@@ -51,6 +51,19 @@ sub _config_file {
     return $self->{config_files}{$location};
 }
 
+sub _home {
+    my $self=shift;
+    if( ! defined $self->{home} ) {
+        if( defined $ENV{"HOME"} ) {
+            $self->{home} = $ENV{HOME};
+        }
+        else {
+            $self->{home} = Cwd::cwd();
+        }
+    }
+    return $self->{home};
+}
+
 sub dump {
     my $self=shift;
     print "configuration path=", join(":", $self->{config_path}->paths()) ,"\n";
@@ -59,7 +72,7 @@ sub dump {
 
 sub config_dir {
     my $self=shift;
-    my $dir=$ENV{HOME}."/.devops";
+    my $dir=($self->_home())."/.devops";
     return $dir;
 }
 
