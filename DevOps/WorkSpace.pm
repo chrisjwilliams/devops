@@ -60,6 +60,7 @@ sub reset {
     # EnvironmentManager
     my $env_config=$self->{node}->get_child(new Paf::Configuration::NodeFilter("EnvironmentManager"));
     $self->{env}=DevOps::EnvironmentManager->new($env_config);
+    $self->{needs_save}=0;
 
 }
 
@@ -88,6 +89,7 @@ sub construct {
     $self->{node}->new_child("project", { "id" => $project->id()->serialize() } );
 
     $self->{config}->save(); # make sure is_constructed returns true
+    $self->{needs_save}=1;
 }
 
 sub project_id {
@@ -251,6 +253,7 @@ sub set_dependent_workspace {
     my $workspaces=$self->{node}->get_child(new Paf::Configuration::NodeFilter("Workspaces"));
     my $node=$workspaces->get_child(new Paf::Configuration::NodeFilter("Workspace", { uid => $dep->uid() } ));
     $node->add_meta( "location", $workspace->{location} );
+    $self->{needs_save}=1;
     return 0;
 }
 
@@ -259,6 +262,7 @@ sub unset_dependent_workspace {
     my $dep=shift|| carp("no dependency provided");
     (my $node)=$self->{node}->search(new Paf::Configuration::NodeFilter("Workspaces"), new Paf::Configuration::NodeFilter("Workspace", { uid => $dep->uid() } ));
     if( $node ) { $node->unhook() }
+    $self->{needs_save}=1;
     return 0;
 }
 
@@ -283,16 +287,19 @@ sub environment {
 
 sub add_dependency {
     my $self=shift;
+    $self->{needs_save}=1;
     $self->project()->add_dependency(@_);
 }
 
 sub add_dependencies {
     my $self=shift;
+    $self->{needs_save}=1;
     $self->project()->add_dependencies(@_);
 }
 
 sub remove_dependencies {
     my $self=shift;
+    $self->{needs_save}=1;
     $self->project()->remove_dependencies(@_);
 }
 
@@ -316,7 +323,7 @@ sub unresolved_dependencies {
 sub save {
     my $self=shift;
 
-    if( defined $self->{config} && $self->is_constructed() ) {
+    if( $self->{needs_save} && defined $self->{config} && $self->is_constructed() ) {
 
         $self->project()->save();
 
