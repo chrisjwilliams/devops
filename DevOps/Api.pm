@@ -168,6 +168,7 @@ sub setup_workspace {
     my $name=shift;
     my $version=shift;
     my $location=shift; # optional
+    my $verbose=shift||0;
 
     # -- check we are not already in a workspace
     my $wm=$self->get_workspace_manager();
@@ -197,11 +198,12 @@ sub setup_workspace {
             # -- we need to create the workspace
             $ws=$wm->construct_workspace($pm->get($pid), $location);
 
+            # -- resolve dependencies
+            $self->resolve_workspace_deps($ws, $verbose);
+
             # -- create the src directory
             my $status=$self->checkout_src($ws);
 
-            # -- resolve dependencies
-            $self->resolve_workspace_deps($ws);
         }
         return $ws;
     }

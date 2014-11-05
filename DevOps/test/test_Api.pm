@@ -24,26 +24,36 @@ sub new {
 
     # set up a test configuration
     $self->{tmpdir}=Paf::File::TempDir->new();
-    $self->{config}=DevOps::Config->new();
-    $self->{config}->set_project_path($self->{tmpdir}->dir());
-    my $workspace_dir=$self->{tmpdir}->dir()."/workspaces";
-    mkdir $workspace_dir or die "unable to make $workspace_dir : $!";
-    $self->{config}->set_workspace_dir($workspace_dir);
-    $self->{config}->workspace_manager_data($self->{tmpdir}->dir()."/workspace.db");
     
     return $self;
 }
 
 sub tests {
-    return qw(test_list_no_projects test_list test_setup_workspace test_resolve_dependencies test_checkout_src test_get_environment test_build)
+    return qw(test_list_no_projects test_list test_setup_workspace test_resolve_dependencies test_setup_workspace_with_deps test_checkout_src test_get_environment test_build)
+}
+
+sub config {
+    my $self=shift;
+
+    my $config=DevOps::Config->new();
+    my $dir=(new Paf::File::TempDir($self->{tmpdir}->dir(), 0))->dir();
+    $config->set_project_path($dir);
+    my $workspace_dir=$dir."/workspaces";
+    mkdir $workspace_dir or die "unable to make $workspace_dir : $!";
+    $config->set_workspace_dir($workspace_dir);
+    $config->workspace_manager_data($dir."/workspace.db");
+    return $config;
 }
 
 sub add_project {
     my $self=shift;
+    my $config=shift;
     my $name=shift;
     my $version=shift;
 
-    my $loc=$self->{tmpdir}->dir()."/$name";
+    #my $loc=$self->{tmpdir}->dir()."/$name";
+    (my $loc)=$config->project_path()->paths();
+    $loc.="/$name";
     if( ! -d $loc )
     {
         mkdir $loc or die "unable to create dir $loc $!";
@@ -53,15 +63,16 @@ sub add_project {
     {
         mkdir $loc or die "unable to create dir $loc $!";
     }
-    return new DevOps::TestUtils::TestProject($name, $version, $loc);
-    
+    my $project=new DevOps::TestUtils::TestProject($name, $version, $loc);
+    $project->save();
+    return $project;
 }
 
 sub test_list_no_projects {
     my $self=shift;
 
     # -- no projects
-    my $api=new DevOps::Api($self->{config});
+    my $api=new DevOps::Api($self->config());
     die "not expecting any projects", if($api->find_projects());
 }
 
@@ -69,20 +80,22 @@ sub test_list {
     my $self=shift;
     
     # -- create multi-projects 
-    $self->add_project($self->{testproject_1_name}, $self->{testproject_1_version});
-    $self->add_project($self->{testproject_2_name}, $self->{testproject_2_version});
-    $self->add_project($self->{testproject_3_name}, $self->{testproject_3_version});
+    my $config=$self->config();
+    $self->add_project( $config, $self->{testproject_1_name}, $self->{testproject_1_version});
+    $self->add_project( $config, $self->{testproject_2_name}, $self->{testproject_2_version});
+    $self->add_project( $config, $self->{testproject_3_name}, $self->{testproject_3_version});
 
-    my $api=new DevOps::Api($self->{config});
+    my $api=new DevOps::Api($config);
     die ("expecting 3 projects, got ", scalar $api->find_projects()), if($api->find_projects() != 3);
 }
 
 sub test_setup_workspace {
     my $self=shift;
 
-    $self->add_project($self->{testproject_1_name}, $self->{testproject_1_version});
+    my $config=$self->config();
+    $self->add_project( $config, $self->{testproject_1_name}, $self->{testproject_1_version});
 
-    my $api=new DevOps::Api($self->{config});
+    my $api=new DevOps::Api($config);
 
     # -- known project requested
     my $ws=$api->setup_workspace($self->{testproject_1_name}, $self->{testproject_1_version});
@@ -97,15 +110,39 @@ sub test_setup_workspace {
     die("not expecting a workspace" ), if (defined $ws3);
 }
 
+sub test_setup_workspace_with_deps {
+    my $self=shift;
+
+    my $config=$self->config();
+    my $api=new DevOps::Api($config);
+
+    my $p1=$self->add_project( $config, $self->{testproject_1_name}, $self->{testproject_1_version});
+    my $p2=$self->add_project( $config, $self->{testproject_2_name}, $self->{testproject_2_version});
+    my $ws_1=$api->setup_workspace($self->{testproject_1_name}, $self->{testproject_1_version});
+    $p2->add_dependency($self->{testproject_1_name}, $self->{testproject_1_version});
+    $p2->save();
+    sync();
+
+    my $ws_2=$api->setup_workspace($self->{testproject_2_name}, $self->{testproject_2_version});
+
+    # -- ensure dependencies have been resolved
+    my @deps=$ws_2->dependencies();
+    die("expecting a dependency, got ", scalar @deps), unless scalar @deps == 1;
+
+    @deps=$ws_2->unresolved_dependencies();
+    die("expecting all deps to be resolved, unresolved=", scalar @deps), if scalar @deps;
+}
+
 sub test_resolve_dependencies {
     my $self=shift;
 
-    $self->add_project($self->{testproject_1_name}, $self->{testproject_1_version});
-    $self->add_project($self->{testproject_2_name}, $self->{testproject_1_version});
-    $self->add_project($self->{testproject_2_name}, $self->{testproject_2_version});
-    $self->add_project($self->{testproject_3_name}, $self->{testproject_3_version});
+    my $config=$self->config();
+    $self->add_project( $config, $self->{testproject_1_name}, $self->{testproject_1_version});
+    $self->add_project( $config, $self->{testproject_2_name}, $self->{testproject_1_version});
+    $self->add_project( $config, $self->{testproject_2_name}, $self->{testproject_2_version});
+    $self->add_project( $config, $self->{testproject_3_name}, $self->{testproject_3_version});
 
-    my $api=new DevOps::Api($self->{config});
+    my $api=new DevOps::Api($config);
     my $ws_1=$api->setup_workspace($self->{testproject_1_name}, $self->{testproject_1_version});
     my $ws_2=$api->setup_workspace($self->{testproject_2_name}, $self->{testproject_2_version});
     my $ws_3=$api->setup_workspace($self->{testproject_3_name}, $self->{testproject_3_version});
@@ -113,19 +150,21 @@ sub test_resolve_dependencies {
     # add some dependenices
     $ws_1->add_dependency( $self->{testproject_2_name}, $self->{testproject_1_version} );
     $ws_1->add_dependency( $self->{testproject_3_name}, $self->{testproject_3_version} );
-    $api->resolve_workspace_deps($ws_1);
+    $api->resolve_workspace_deps($ws_1, 2);
 
     # verify dependencies
     my @deps=$ws_1->dependencies();
     die("expecting two dependencies, got @deps"), if( scalar @deps != 2 );
-    foreach my $dep ( $ws_1->dependencies() ) {
-    }
+
+    @deps=$ws_1->unresolved_dependencies();
+    die("not expecting all deps to be resolved, unresolved=", scalar @deps), unless scalar @deps == 1;
 }
 
 sub test_checkout_src {
     my $self=shift;
 
-    my $api=new DevOps::Api($self->{config});
+    my $config=$self->config();
+    my $api=new DevOps::Api($config);
     my $ws=new DevOps::TestUtils::TestWorkSpace;
     my $project=$ws->project();
     
@@ -183,7 +222,8 @@ sub test_checkout_src {
 sub test_get_environment {
     my $self=shift;
 
-    my $api=new DevOps::Api($self->{config});
+    my $config=$self->config();
+    my $api=new DevOps::Api($config);
     my $ws=new DevOps::TestUtils::TestWorkSpace;
 
     my $test_env_name="test_env_name";
@@ -218,8 +258,9 @@ sub test_get_environment {
 sub test_build {
     my $self=shift;
 
-    my $api=new DevOps::Api($self->{config});
-    $self->add_project($self->{testproject_1_name}, $self->{testproject_1_version});
+    my $config=$self->config();
+    my $api=new DevOps::Api($config);
+    $self->add_project( $config, $self->{testproject_1_name}, $self->{testproject_1_version});
     my $ws_1=$api->setup_workspace($self->{testproject_1_name}, $self->{testproject_1_version});
 
     my $platform = Paf::Platform::TestHost->new();
