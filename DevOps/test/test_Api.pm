@@ -114,21 +114,31 @@ sub test_setup_workspace_with_deps {
     my $self=shift;
 
     my $config=$self->config();
+    {
+        my $api=new DevOps::Api($config);
+
+        my $p1=$self->add_project( $config, $self->{testproject_1_name}, $self->{testproject_1_version});
+        my $p2=$self->add_project( $config, $self->{testproject_2_name}, $self->{testproject_2_version});
+        my $ws_1=$api->setup_workspace($self->{testproject_1_name}, $self->{testproject_1_version});
+        $p2->add_dependency($self->{testproject_1_name}, $self->{testproject_1_version});
+        $p2->save();
+        sync();
+
+        my $ws_2=$api->setup_workspace($self->{testproject_2_name}, $self->{testproject_2_version});
+
+        # -- ensure dependencies have been resolved
+        my @deps=$ws_2->dependencies();
+        die("expecting a dependency, got ", scalar @deps), unless scalar @deps == 1;
+
+        @deps=$ws_2->unresolved_dependencies();
+        die("expecting all deps to be resolved, unresolved=", scalar @deps), if scalar @deps;
+    }
+
+    # - persistency test
     my $api=new DevOps::Api($config);
-
-    my $p1=$self->add_project( $config, $self->{testproject_1_name}, $self->{testproject_1_version});
-    my $p2=$self->add_project( $config, $self->{testproject_2_name}, $self->{testproject_2_version});
-    my $ws_1=$api->setup_workspace($self->{testproject_1_name}, $self->{testproject_1_version});
-    $p2->add_dependency($self->{testproject_1_name}, $self->{testproject_1_version});
-    $p2->save();
-    sync();
-
     my $ws_2=$api->setup_workspace($self->{testproject_2_name}, $self->{testproject_2_version});
-
-    # -- ensure dependencies have been resolved
     my @deps=$ws_2->dependencies();
     die("expecting a dependency, got ", scalar @deps), unless scalar @deps == 1;
-
     @deps=$ws_2->unresolved_dependencies();
     die("expecting all deps to be resolved, unresolved=", scalar @deps), if scalar @deps;
 }
