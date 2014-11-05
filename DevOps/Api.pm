@@ -200,6 +200,7 @@ sub setup_workspace {
 
             # -- resolve dependencies
             $self->resolve_workspace_deps($ws, $verbose);
+            $ws->save(); # save work so far as there in case of bugs cause destructor failure
 
             # -- create the src directory
             my $status=$self->checkout_src($ws);
