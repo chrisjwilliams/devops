@@ -41,7 +41,7 @@ sub run {
     if( ! defined $name ) { return $self->error("no name specified") };
     if( ! defined $version ) { return $self->error("no version specified") };
 
-    my $ws=$self->{api}->setup_workspace($name, $version, $location);
+    my $ws=$self->{api}->setup_workspace($name, $version, $location, $self->verbose_level());
     if( ! defined $ws ) {
         return $self->error("error setting up workspace for $name $version : $!");
     }
