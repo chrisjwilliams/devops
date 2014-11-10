@@ -105,6 +105,7 @@ sub build_workspace {
     my $build_area=$workspace->build_out($platform, $variants);
     my $env=$build_area->env();
     $env->set("src_dir", $workspace->checkout_dir());
+    $env->set("version", $workspace->version());
 
     # -- get dependents build environments
     foreach my $dep ( $workspace->dependencies() ) {
