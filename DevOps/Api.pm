@@ -146,7 +146,7 @@ sub build_workspace {
 
     foreach my $task_name ( $workspace->build_tasks() ) {
         my $task=new Paf::Platform::Task($platform);
-        foreach my $line ( $workspace->build_commands($task_name, $platform, $variants) ) {
+        foreach my $line ( $workspace->build_commands($task_name, $platform, $variants, $verbose) ) {
             print "task $task_name: ",$line, "\n", if( $verbose > 2 );
             $line=$env->expandString($line);
             print "task $task_name: ",$line, "\n", if( $verbose > 1 );

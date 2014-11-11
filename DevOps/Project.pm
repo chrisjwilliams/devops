@@ -159,20 +159,23 @@ sub task_code {
     my $task_name=shift || carp ("task_name unspecified");
     my $platform=shift; # optional - use undef
     my $variant=shift;  # optional - use undef
+    my $verbose=shift||0;
 
     my $task_node=$self->_task_node($workflow, $task_name);
 
-    # read in any workspace scoped environments, and task specific environments
+    # read in any workspace and task scoped environments
     my $env=DevOps::Environment->new();
     foreach my $env_filter ( $self->_variant_sections("environment", $platform, $variant), new Paf::Configuration::NodeFilter("environment", {}) )
     {
-        my @envs= $task_node->search($env_filter), $self->{workflows}{$workflow}->search($env_filter);
+        my @envs=($task_node->search($env_filter), $self->{workflows}{$workflow}->search($env_filter));
         next, unless @envs;
         foreach my $e ( @envs ) {
             my $var_block=new DevOps::Configuration::VariableBlock($e);
             $env->merge(new DevOps::Environment($var_block->vars()));
         }
     }
+
+    print "task $workflow:$task_name environment:\n", $env->dump(), "\n", if( $verbose > 1 );
 
     foreach my $filter ( $self->_variant_sections("code", $platform, $variant) )
     {
