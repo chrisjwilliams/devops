@@ -175,8 +175,18 @@ sub merge {
             if( ref($hash) eq "DevOps::Environment" ) {
                 $hash=$hash->{env};
             }
-            for( keys %$hash ) {
-                $self->{env}{$_}=$hash->{$_}, if( ! defined $self->{env}{$_} );
+            foreach my $key ( keys %$hash ) {
+                if( ! defined $self->{env}{$key} ) {
+                    $self->{env}{$key}=$hash->{$key};
+                    next;
+                }
+                # deal with any self referencing vars
+                if( $hash->{$key}=~/(.*?)(?<!\$)\$\{\Q$key\E\}(.*(\n?))/ ) {
+                    my $string=$hash->{$key};
+                    my $val=$self->{env}{$key};
+                    $string=~s/(.*?)(?<!\$)\$\{\Q$key\E\}(.*(\n?))/$1$val$2/g;
+                    $self->{env}{$key}=$string;
+                }
             }
         }
     }
