@@ -18,7 +18,7 @@ sub new {
 }
 
 sub tests {
-    return qw( test_size test_remove test_expand test_merge );
+    return qw( test_size test_remove test_expand test_merge test_self_refering_variable);
 }
 
 sub test_size {
@@ -76,7 +76,6 @@ sub test_expand {
     my $cppstring='cpp';
     die("expecting\n\t\t$cppstring\n\tgot\n\t\t$string"), if($cppstring ne $string);
 
-
     # -- expand with namespaces
     $env->namespace("fred","george");
     $string='${fred::a}+$${a}-${george::b}*$${b} ${bad} ${fred::b}'."\n";
@@ -91,6 +90,13 @@ sub test_expand {
     $string='${fred::a}+$${a}-${b}*$${b} ${bad} ${b}'."\n";
     $string=$env->expandString($string);
     die("expecting\n\t\t$estring\n\tgot\n\t\t$string"), if($estring ne $string);
+}
+
+sub test_self_refering_variable {
+    my $self=shift;
+    my $env=$self->_initEnv();
+    $env->set("some_var", 'abc${some_var}');
+    die("unexpected value"), unless $env->var("some_var") eq 'abc${some_var}';
 }
 
 sub test_merge {

@@ -10,6 +10,7 @@
 # diff(Environment) : returns a new Environment containing values in this
 #                     object that differ from the one passed
 # env() : return a hash ref of the environment
+# expand(Environment)  : expand all variables in the object by any definitions in the passed env
 # expandString(string) : expand the variables in the passed string
 #                        marked with curly brackets e.g. ${varname} 
 #                        use $$ to escape the $ identifier
@@ -81,7 +82,7 @@ sub var {
     my $name=shift;
 
     if( defined $self->{env}{$name} ) {
-        return $self->expandString($self->{env}{$name},"");
+        return $self->_expandStringExclude($self->{env}{$name},[ $name ], "");
     }
 
     # -- not found locally so parse through other envs
@@ -101,9 +102,38 @@ sub set {
     $self->{env}{$name}=shift;
 }
 
+sub expand {
+    my $self=shift;
+    my $env=shift;
+
+    foreach my $key ( keys %{$self->{env}} ) {
+        $self->{env}{$key}=$env->_expandStringExclude($self->{env}{$key}, [ $key ] );
+    }
+}
+
 sub expandString {
     my $self=shift;
     my $string=shift;
+    $self->_expandString($string,[ keys %{$self->{env}} ], @_);
+}
+
+sub _expandStringExclude {
+    my $self=shift;
+    my $string=shift;
+    my $excluded=shift;
+    
+    my @keys=();
+    foreach my $key ( keys %{$self->{env}} ) {
+        next, if( grep(/^$key$/, @{$excluded}) );
+        push @keys, $key;
+    }
+    return $self->_expandString( $string, \@keys, @_);
+}
+
+sub _expandString {
+    my $self=shift;
+    my $string=shift;
+    my $expansion_list=shift;
 
     my @ns;
     if(@_) {
@@ -113,7 +143,7 @@ sub expandString {
         @ns=@{$self->{ns}};
     }
     if( defined $string ) {
-        foreach my $v ( keys %{$self->{env}} ) {
+        foreach my $v ( @{$expansion_list} ) {
             foreach my $namesp ( @ns ) {
                 while( $string=~/(.*?)(?<!\$)\$\{\Q$namesp$v\E\}(.*(\n?))/g ) {
                     my $f1=$1;
