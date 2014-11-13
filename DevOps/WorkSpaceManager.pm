@@ -136,6 +136,7 @@ sub environment {
     my $self=shift;
     my $workspace=shift;
     my $name=shift;
+    my $namespace=shift||1;
 
     my $env=$workspace->environment($name);
     foreach my $dep ( $workspace->dependencies() )
@@ -144,8 +145,13 @@ sub environment {
         if( defined $ws_id ) {
             # -- only immediate dependencies are included so we don't recursively call this method
             my $ws=$self->get_workspace_from_location($ws_id);
-            $env->merge_namespace( [ $dep->name() , $dep->version() ], $ws->environment($name) );
-            $env->merge_namespace( [ $dep->name() ], $ws->environment($name) );
+            if($namespace == 1) {
+                $env->merge_namespace( [ $dep->name() , $dep->version() ], $ws->environment($name) );
+                $env->merge_namespace( [ $dep->name() ], $ws->environment($name) );
+            }
+            else {
+                $env->merge( $ws->environment($name, $namespace) );
+            }
         }
     }
 

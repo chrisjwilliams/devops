@@ -107,6 +107,8 @@ sub build_workspace {
     $env->set("src_dir", $workspace->checkout_dir());
     $env->set("version", $workspace->version());
 
+    my $runtime=$workspace->environment("runtime");
+
     # -- get dependents build environments
     foreach my $dep ( $workspace->dependencies() ) {
         if( defined (my $loc=$workspace->workspace_dependency($dep)) ) {
@@ -116,10 +118,13 @@ sub build_workspace {
                 die "unable to find workspace at $loc\n";
             }
             my $dep_build_out=$dep_ws->search_build_out($platform, $variants);
+            my $dep_runtime=$dep_ws->environment("runtime");
             if( defined $dep_build_out ) {
+                $dep_runtime->expand($dep_build_out->env());
                 $env->merge_namespace( [ $dep->name(), $dep->version()], $dep_build_out->env());
                 $env->merge_namespace( [ $dep->name() ], $dep_build_out->env());
             }
+            $runtime->merge($dep_runtime);
         }
     }
 
@@ -144,8 +149,15 @@ sub build_workspace {
     require Paf::Platform::Task;
     my $task_series=Paf::Platform::TaskSeries->new();
 
+    $runtime->expand($env);
+    if( $verbose > 1 ) {
+        print "runtime:\n";
+        print $runtime->dump(\*STDOUT), "\n";
+    }
+
     foreach my $task_name ( $workspace->build_tasks() ) {
         my $task=new Paf::Platform::Task($platform);
+        $task->runtime_environment($runtime->env());
         foreach my $line ( $workspace->build_commands($task_name, $platform, $variants, $verbose) ) {
             print "task $task_name: ",$line, "\n", if( $verbose > 2 );
             $line=$env->expandString($line);

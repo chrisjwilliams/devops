@@ -78,4 +78,3 @@ sub _env_nodes {
     my $name=shift;
     return $self->{node}->search(new Paf::Configuration::NodeFilter("environment", { name => $name }));
 }
-
