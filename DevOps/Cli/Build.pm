@@ -13,6 +13,7 @@ package DevOps::Cli::Build;
 use parent "DevOps::Cli::Command";
 use Paf::Cli::Argument;
 use Paf::Cli::OptionalArgument;
+use DevOps::Cli::ToolChain;
 use strict;
 1;
 
@@ -22,11 +23,12 @@ sub new {
 	my $class=shift;
 
 	my $self=$class->SUPER::new(@_);
+    $self->{toolchain}=DevOps::Cli::ToolChain->new();
 
     # -- set some default variants
-    $self->{variants} = { toolchain => [ qw(gcc) ] };
     $self->add_argument(new Paf::Cli::OptionalArgument("project_name", "specify the name of the project to build (outside of a project workspace)"));
     $self->add_argument(new Paf::Cli::OptionalArgument("project_version", "specify the version of the project to build (outside of a project workspace)"));
+    $self->add_options($self->{toolchain});
 
 	return $self;
 }
@@ -41,6 +43,11 @@ sub synopsis {
 
 sub run {
     my $self=shift;
+
+    $self->{variants} = { toolchain => [ $self->{toolchain}->toolchain() ] };
+    if( @_ ) {
+        $self->{variants}{extra_params}{setup} = [ @_ ];
+    }
 
     my $ws=$self->current_workspace();
     if( ! $ws ) {

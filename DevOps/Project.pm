@@ -244,8 +244,10 @@ sub _variant_sections {
     }
     foreach my $search ( @outer_list ) {
         foreach my $key ( sort keys %{$variants} ) {
-            $search->{$key}=join("_", sort(@{$variants->{$key}}));
-            unshift @list, new Paf::Configuration::NodeFilter($base, $search);
+            if(defined @{$variants->{key}}) {
+                $search->{$key}=join("_", sort(@{$variants->{$key}}));
+                unshift @list, new Paf::Configuration::NodeFilter($base, $search);
+            }
         }
     }
     return @list;
