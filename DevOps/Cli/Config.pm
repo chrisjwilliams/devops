@@ -39,6 +39,7 @@ sub run {
     my $location=shift @$args || die "no location specified";
     die "$location does not exist", if( ! -d $location );
     $self->{config_location}=$location;
+    return 0;
 }
 
 sub config_location {
