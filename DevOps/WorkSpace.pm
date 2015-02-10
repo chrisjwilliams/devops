@@ -228,7 +228,24 @@ sub build_tasks {
 
 sub build_commands {
     my $self=shift;
-    return $self->project()->task_code("build", @_);
+    my $task_name=shift || carp ("task_name unspecified");
+    my $platform=shift; # optional - use undef
+
+    my $workflow="build";
+    
+    # -- deduce evironments for each resolved dependency
+    my @filters=();
+    foreach my $dep ( $self->resolved_dependencies() ) {
+        if( defined $platform ) {
+            push @filters, new Paf::Configuration::NodeFilter("environment", { arch => $platform->arch(), dependency => $dep->name(), version => $dep->version() });
+            push @filters, new Paf::Configuration::NodeFilter("environment", { arch => $platform->arch(), dependency => $dep->name() });
+        }
+        push @filters, new Paf::Configuration::NodeFilter("environment", { dependency => $dep->name(), version => $dep->version() });
+        push @filters, new Paf::Configuration::NodeFilter("environment", { dependency => $dep->name() });
+    }
+    my $env=$self->project()->task_environment( $workflow, $task_name, @filters);
+
+    return $self->project()->task_code($workflow, $task_name, $env, $platform, @_);
 }
 
 sub checkout_dir {
@@ -314,6 +331,18 @@ sub unresolved_dependencies {
     my @deps=();
     foreach my $dep ( $self->dependencies() ) {
         if( ! defined $self->workspace_dependency($dep) ) {
+            push @deps, $dep;
+        }
+    }
+    return @deps;
+}
+
+sub resolved_dependencies {
+    my $self=shift;
+
+    my @deps=();
+    foreach my $dep ( $self->dependencies() ) {
+        if( defined $self->workspace_dependency($dep) ) {
             push @deps, $dep;
         }
     }

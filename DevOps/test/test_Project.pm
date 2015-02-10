@@ -147,11 +147,11 @@ sub test_task_code {
 
     # generic put/get with different params
     $project->add_task_code($workflow, $task_name, undef, undef, @code);
-    my @saved_code=$project->task_code($workflow, $task_name, undef, undef);
+    my @saved_code=$project->task_code($workflow, $task_name, undef, undef, undef);
     die("expecting @code, got @saved_code"), unless ("@code" eq "@saved_code" );
-    @saved_code=$project->task_code($workflow, $task_name, $platform, undef);
+    @saved_code=$project->task_code($workflow, $task_name, undef, $platform, undef);
     die("expecting @code, got @saved_code"), unless ("@code" eq "@saved_code" );
-    @saved_code=$project->task_code($workflow, $task_name, $platform, { type => [ qw( debug profiled ) ] } );
+    @saved_code=$project->task_code($workflow, $task_name, undef, $platform, { type => [ qw( debug profiled ) ] } );
     die("expecting @code, got @saved_code"), unless ("@code" eq "@saved_code" );
 
     # -- specialization put/get with different params
@@ -159,26 +159,26 @@ sub test_task_code {
     my @specialized_code=qw(line_1 line_2 specialized_line_3);
     $project->add_task_code($workflow, $task_name, undef, { type => [ qw( debug profiled ) ] }, @specialized_code );
 
-    @saved_code=$project->task_code($workflow, $task_name, $platform, { type => [ qw( debug profiled ) ] } );
+    @saved_code=$project->task_code($workflow, $task_name, undef, $platform, { type => [ qw( debug profiled ) ] } );
     die("expecting @specialized_code, got @saved_code"), unless ("@specialized_code" eq "@saved_code" );
 
-    @saved_code=$project->task_code($workflow, $task_name, undef, { type => [ qw( debug profiled ) ] } );
+    @saved_code=$project->task_code($workflow, $task_name, undef, undef, { type => [ qw( debug profiled ) ] } );
     die("expecting @specialized_code, got @saved_code"), unless ("@specialized_code" eq "@saved_code" );
 
-    @saved_code=$project->task_code($workflow, $task_name, $platform, undef);
+    @saved_code=$project->task_code($workflow, $task_name, undef, $platform, undef);
     die("expecting @code, got @saved_code"), unless ("@code" eq "@saved_code" );
 
-    @saved_code=$project->task_code($workflow, $task_name, undef, undef);
+    @saved_code=$project->task_code($workflow, $task_name, undef, undef, undef);
     die("expecting @code, got @saved_code"), unless ("@code" eq "@saved_code" );
 
     # -- platform specific parameters
     my @platform_code=qw(platform_line_1 platform_line_2 platform_line_3);
     $project->add_task_code($workflow, $task_name, $platform, undef, @platform_code );
 
-    @saved_code=$project->task_code($workflow, $task_name, $platform, undef );
+    @saved_code=$project->task_code($workflow, $task_name, undef, $platform, undef );
     die("expecting @platform_code, got @saved_code"), unless ("@platform_code" eq "@saved_code" );
 
-    @saved_code=$project->task_code($workflow, $task_name, undef, undef);
+    @saved_code=$project->task_code($workflow, $task_name, undef, undef, undef);
     die("expecting @code, got @saved_code"), unless ("@code" eq "@saved_code" );
 
     @saved_code=$project->task_code($workflow, $task_name, $platform, { type => [ qw( debug profiled ) ] } );
