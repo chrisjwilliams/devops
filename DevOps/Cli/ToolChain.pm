@@ -51,7 +51,7 @@ sub toolchain {
     my $self=shift;
     if( !defined $self->{tc} ) {
         if( defined $ENV{CXX} && $ENV{CXX} ne "" ) {
-            @{$self->{tc}}=( File::basename($ENV{CXX}) );
+            @{$self->{tc}}=( basename($ENV{CXX}) );
         }
         else {
             @{$self->{tc}}=qw(gcc);
