@@ -199,7 +199,7 @@ sub setup_workspace {
     (my $pid)=$pm->list( { "name" => $name, "version" => $version } );
     if(defined $pid) {
         my $ws;
-        if( defined $location ) {
+        if( defined $location && -d $location ) {
             # -- don't build over an already existing workspace
             $ws=$wm->get_workspace_from_location($location);
         }
