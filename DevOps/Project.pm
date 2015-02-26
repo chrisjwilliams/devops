@@ -150,7 +150,7 @@ sub add_environment {
 # @brief return the code associated with a specific workflow task.
 #
 #        variants and platform specific tasks are supported.
-#        The code will be exapnded if there are any task variables 
+#        The code will be expanded if there are any task variables 
 #        defined.
 #
 sub task_code {
