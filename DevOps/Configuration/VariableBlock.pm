@@ -18,10 +18,10 @@ use strict;
 # -- initialisation
 
 sub new {
-	my $class=shift;
+my $class=shift;
 
-	my $self={};
-	bless $self, $class;
+    my $self={};
+    bless $self, $class;
     $self->{node}=shift || confess "no node specified";
     $self->{need_save}=0;
 
@@ -29,7 +29,7 @@ sub new {
 
     $self->read();
 
-	return $self;
+    return $self;
 }
 
 sub set_var {
@@ -84,6 +84,7 @@ sub read {
             if ( $val=~/^\s*"(.+)\"\s*$/o ) {
                 ($val=$1)=~s/\\"/"/g;
             }
+            chomp $val;
             $self->{vars}{$var}=$val;
         }
         else {
