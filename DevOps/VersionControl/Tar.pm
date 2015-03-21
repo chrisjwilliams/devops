@@ -15,6 +15,7 @@ use Paf::File::PushDir;
 use Paf::File::DownloadCache;
 use File::Basename;
 use Carp;
+use Archive::Tar;
 use warnings;
 use strict;
 1;
@@ -22,10 +23,10 @@ use strict;
 # -- initialisation
 
 sub new {
-	my $class=shift;
+    my $class=shift;
 
-	my $self={};
-	bless $self, $class;
+    my $self={};
+    bless $self, $class;
 
     $self->{config}=shift;
     if( ! defined $self->{config}{url} ) {
@@ -43,7 +44,7 @@ sub new {
 
     $self->{cache}=Paf::File::DownloadCache->new($self->{config}{cache_location});
 
-	return $self;
+    return $self;
 }
 
 sub checkout {
@@ -51,7 +52,7 @@ sub checkout {
     my $destination=shift || carp "destination not passed";
     my $version=shift;
 
-    if($destination!~/^\/.*/) {
+    if(!File::Spec->file_name_is_absolute($destination)) {
         carp "$destination is not a full path";
     }
 
@@ -71,7 +72,7 @@ sub _unpack {
     my $self=shift;
     my $workspace=shift;
     my $file = shift;
-    
+
     my($filename, $directories, $suffix) = fileparse($file, '\..*');
     my $cmd="";
     my $tar=$self->{config}{tar_cmd}." -o";
@@ -81,14 +82,44 @@ sub _unpack {
     }
     elsif( $file =~ /tar\.gz$/i || $suffix=~/tgz$/i )
     {
-        $cmd="$tar -xzf";
+        if( -e $tar ) {
+            $cmd="$tar -xzf";
+        }
+        elsif(Archive::Tar->has_zlib_support) {
+            my $dirstack=Paf::File::PushDir->new($workspace);
+            my $tar=Archive::Tar->new();
+            $tar->extract_archive("$file", COMPRESS_GZIP) or warn "extraction failed :", $tar->error();
+            return $workspace;
+        }
+	else {
+	    die ("unable to untar zipped file - not available");
+	}
     }
     elsif( $file =~ /tar\.bz2$/i || $suffix=~/tbz$/i ) {
-        $cmd="$tar -xjf";
+        if( -e $tar )
+            $cmd="$tar -xjf";
+        }
+        elsif(Archive::Tar->has_bzip2_support) {
+            my $dirstack=Paf::File::PushDir->new($workspace);
+            my $tar=Archive::Tar->new();
+            $tar->extract_archive("$file", COMPRESS_BZIP) or warn "extraction failed :", $tar->error();
+            return $workspace;
+        }
+	else {
+	    die ("unable to untar bzip2 file - not available");
+	}
     }
     elsif( $suffix =~ /tar$/i )
     {
-        $cmd="$tar -xf";
+        if( -e $tar ) {
+            $cmd="$tar -xf";
+	}
+	else {
+            my $dirstack=Paf::File::PushDir->new($workspace);
+	    my $tar=Archive::Tar->new();
+	    $tar->extract_archive("$file") or warn "extraction failed :", $tar->error();
+	    return $workspace;
+	}
     }
 
     if( $cmd ne "" ) {
