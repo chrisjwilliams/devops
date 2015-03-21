@@ -58,7 +58,8 @@ sub _home {
             $self->{home} = $ENV{HOME};
         }
         else {
-            $self->{home} = Cwd::cwd();
+	    require File::HomeDir;
+            $self->{home} = File::HomeDir->my_home;
         }
     }
     return $self->{home};
