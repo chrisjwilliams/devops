@@ -34,7 +34,7 @@ sub checkout {
     my $destination=shift || carp "destination not passed";
     my $version=shift; # ignored
 
-    if($destination!~/^\/.*/) {
+    if(!File::Spec->file_name_is_absolute($destination)) {
         carp "$destination is not a full path";
     }
     if( ! -d $destination ) {

@@ -22,19 +22,19 @@ use Storable;
 # -- initialisation
 
 sub new {
-	my $class=shift;
+    my $class=shift;
 
-	my $self={};
-	bless $self, $class;
+    my $self={};
+    bless $self, $class;
 
     $self->{file}=shift || carp ("expecting a filename");
     $self->{base}=shift || carp ("expecting a base directory");
 
-    if( $self->{file}!~/^[\\\/].*/ ) { die ("storage filename must be a fullpath", $self->{file}) };
+    if( !File::Spec->file_name_is_absolute($self->{file}) ) { die ("storage filename must be a fullpath : ", $self->{file}) };
 
     $self->_read(), if( -f $self->{file} );
 
-	return $self;
+    return $self;
 }
 
 sub get_workspace
@@ -115,7 +115,7 @@ sub current_workspace
     while( ! $workspace->is_constructed() ) {
         $path=dirname $path;
         $workspace->reset($path);
-        return undef, if( $path eq "/" );
+        return undef, if( $path eq dirname $path );
     }
 
     # -- check this area is registered
