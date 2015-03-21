@@ -24,14 +24,14 @@ use Scalar::Util;
 # -- initialisation
 
 sub new {
-	my $class=shift;
+    my $class=shift;
 
-	my $self={};
-	bless $self, $class;
+    my $self={};
+    bless $self, $class;
 
     $self->reset(@_);
 
-	return $self;
+    return $self;
 }
 
 sub reset {
