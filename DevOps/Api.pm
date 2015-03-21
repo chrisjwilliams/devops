@@ -219,6 +219,12 @@ sub setup_workspace {
             my $status=$self->checkout_src($ws);
 
         }
+        else {
+            my $dest_dir=$ws->checkout_dir();
+            if( ! -d $dest_dir || glob($dest_dir) ) {
+                my $status=$self->checkout_src($ws);
+            }
+        }
         return $ws;
     }
     return undef;
@@ -259,7 +265,7 @@ sub find_projects {
 sub checkout_src {
     my $self=shift;
     my $workspace=shift || carp "no workspace provided";
-    
+
     foreach my $src ( $workspace->project()->sources() ) {
         my $dest_dir=$workspace->checkout_dir();
 
@@ -306,7 +312,7 @@ sub get_environment {
     # -- fetch environments from the all workspaces
     my $wm=$self->get_workspace_manager();
     my $env=$wm->environment($workspace, $name);
-    
+
     # -- fill in any dependencies we don't have local workspaces for with project environment info
     my $pm=$self->get_project_manager();
     foreach my $dep ( $workspace->dependencies() ) {
