@@ -96,7 +96,7 @@ sub _unpack {
 	}
     }
     elsif( $file =~ /tar\.bz2$/i || $suffix=~/tbz$/i ) {
-        if( -e $tar )
+        if( -e $tar ) {
             $cmd="$tar -xjf";
         }
         elsif(Archive::Tar->has_bzip2_support) {
