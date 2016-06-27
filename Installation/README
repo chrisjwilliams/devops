@@ -19,8 +19,9 @@ You need :
 
 Assuming that to be reading this you have checked out a copy of devops from 
 the devops repository. You can then continue with 
-
-1) cd Installation (this directory)
-2) ./install_devops (will default install to /usr/local/bin. Use -h option for help)
+1) git submodule init
+2) git submodule update
+3) cd Installation (this directory)
+4) ./install_devops (will default install to /usr/local/bin. Use -h option for help)
 
 Thats it - enjoy.
