@@ -9,6 +9,7 @@ use FindBin;
 use lib "$FindBin::RealBin/..";
 use lib "$FindBin::RealBin/../Externals";
 use lib "$FindBin::RealBin/../Externals/paf";
+use lib "$FindBin::RealBin/../Externals/IO";
 use strict;
 
 use Paf::Cli::App;
