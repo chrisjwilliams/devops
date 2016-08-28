@@ -15,10 +15,11 @@ use strict;
 1;
 
 sub new {
-	my $class=shift;
+    my $class=shift;
 
-	my $self=$class->SUPER::new(@_);
-	return $self;
+    my $self=$class->SUPER::new(@_);
+    $self->{api} = shift; 
+    return $self;
 }
 
 sub name {
@@ -44,6 +45,9 @@ sub run {
 
 sub config_location {
     my $self=shift;
+    if( ! defined $self->{config_location} ) {
+        $self->{config_location}=$self->{api}->get_config()->config_dir();
+    }
     return $self->{config_location};
 }
     
@@ -57,16 +61,16 @@ use strict;
 # -- initialisation
 
 sub new {
-	my $class=shift;
+    my $class=shift;
 
-	my $self=$class->SUPER::new(@_);
+    my $self=$class->SUPER::new(@_);
 
     $self->add_cmds(DevOps::Cli::ConfigAdd->new($self->{api}),
                     DevOps::Cli::ConfigList->new($self->{api}));
 
-    $self->{loc_opt}=DevOps::Cli::ConfigLocationOption->new();
+    $self->{loc_opt}=DevOps::Cli::ConfigLocationOption->new($self->{api});
     $self->add_options($self->{loc_opt});
-	return $self;
+    return $self;
 }
 
 sub name {

@@ -90,6 +90,7 @@ sub construct {
 
     $self->{config}->save(); # make sure is_constructed returns true
     $self->{needs_save}=1;
+    $self->{project}=$project;
 }
 
 sub project_id {
@@ -98,7 +99,7 @@ sub project_id {
     {
         (my $node)=$self->{node}->search(new Paf::Configuration::NodeFilter("project"));
         my $id;
-        if($node) { $id=$node->meta()->{id} };
+        if($node) { $id=$node->meta()->{id} }
         $self->{proj_id}=new DevOps::ProjectId($id);
     }
     return $self->{proj_id};

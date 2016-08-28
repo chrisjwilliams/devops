@@ -60,6 +60,7 @@ sub get_workspace
     {
         if(! -d $location ) {
             # ---- corrupted database - fix it -----
+	    print "removing corrupted entry", $location;
             $self->remove_entry($project_id);
         }
         else
@@ -74,7 +75,7 @@ sub get_workspace
 sub construct_workspace
 {
     my $self=shift;
-    my $project=shift || die "expecting a project";
+    my $project=shift || carp "expecting a project";
     my $location=shift;
 
     my $project_id=$project->id();

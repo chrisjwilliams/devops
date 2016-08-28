@@ -260,6 +260,27 @@ sub find_projects {
 }
 
 #
+# @brief create an entry in the provided project store
+# @return new Project object
+sub create_project {
+    my $self=shift;
+    my $store=shift || carp "no store id provided";
+    my $name=shift || carp "no project name provided";
+    my $version=shift || carp "no project version specified";
+
+    # -- ensure project does not already exist
+    my $pm=$self->get_project_manager();
+    my @pids=$pm->list( { "name" => $name, "version" => $version } );
+    if(@pids) {
+	carp "project $name $version already exists";
+    }
+
+    # -- add a new project
+    my $project=$pm->create_project( $store, { "name" => $name, "version" => $version } );
+    return $project;
+}
+
+#
 # @brief construct the src directory inside the provided workspace
 #
 sub checkout_src {

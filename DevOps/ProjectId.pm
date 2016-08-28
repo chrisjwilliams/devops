@@ -18,11 +18,11 @@ use strict;
 # -- initialisation
 
 sub new {
-	my $class=shift;
-    my $uid=shift||die "expecting an identifier";
+    my $class=shift;
+    my $uid=shift|| carp "expecting an identifier";
 
-	my $self={};
-	bless $self, $class;
+    my $self={};
+    bless $self, $class;
 
     if( ! blessed($uid) )
     {
@@ -35,7 +35,7 @@ sub new {
     $self->{name}=$self->{uid}->value("name");
     $self->{version}=$self->{uid}->value("version");
 
-	return $self;
+    return $self;
 }
 
 sub devops_version {

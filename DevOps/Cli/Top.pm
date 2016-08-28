@@ -4,6 +4,7 @@ use parent "Paf::Cli::Command";
 use DevOps::Api;
 use DevOps::Cli::Build;
 use DevOps::Cli::Config;
+use DevOps::Cli::Create;
 use DevOps::Cli::Dependency;
 use DevOps::Cli::Env;
 use DevOps::Cli::Import;
@@ -23,6 +24,7 @@ sub new {
 
     $self->add_cmds(DevOps::Cli::Build->new($api),
                     DevOps::Cli::Config->new($api),
+                    DevOps::Cli::Create->new($api),
                     DevOps::Cli::Env->new($api),
                     #DevOps::Cli::Import->new($api),
                     DevOps::Cli::Project->new($api),

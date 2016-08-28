@@ -42,6 +42,13 @@ sub add_store {
     $self->{store_lookup}{$store->id()}=$store;
 }
 
+sub get_location_store {
+    my $self=shift;
+    my $location=shift;
+    my $id="Paf::DataStore::DirStore_".$location."/Projects";
+    return $self->{store_lookup}{$id};
+}
+
 sub list {
     my $self=shift;
 
@@ -77,6 +84,29 @@ sub get {
         $self->{projects}{$uid}=DevOps::Project->new($id, $self->project_location($id->uid()));
     }
     return $self->{projects}{$uid};
+}
+
+#
+# @brief create a project in the specifed store
+# @return the project Id if the new project
+#
+sub create_project {
+    my $self=shift;
+    my $store_id=shift|| carp("must specify store id");
+    my $project_id=shift || carp "no project id provided";
+
+    # -- find the store to add to
+    my $store=$self->{store_lookup}{$store_id} || $self->get_location_store($store_id);
+    if(!defined $store) {
+	carp "create_project - store '${store_id}' does not exist";
+    }
+
+    # -- create a suitable project object
+    my $uid=$store->add($project_id);
+    my $pid=DevOps::ProjectId->new($uid);
+    my $project=$self->get($pid);
+    $project->save();
+    return $project;
 }
 
 sub import_project {

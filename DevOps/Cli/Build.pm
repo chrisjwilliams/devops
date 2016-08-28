@@ -20,9 +20,9 @@ use strict;
 # -- initialisation
 
 sub new {
-	my $class=shift;
+    my $class=shift;
 
-	my $self=$class->SUPER::new(@_);
+    my $self=$class->SUPER::new(@_);
     $self->{toolchain}=DevOps::Cli::ToolChain->new();
 
     # -- set some default variants
@@ -30,7 +30,7 @@ sub new {
     $self->add_argument(new Paf::Cli::OptionalArgument("project_version", "specify the version of the project to build (outside of a project workspace)"));
     $self->add_options($self->{toolchain});
 
-	return $self;
+    return $self;
 }
 
 sub name {
