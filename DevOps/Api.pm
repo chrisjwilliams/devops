@@ -227,6 +227,9 @@ sub setup_workspace {
         }
         return $ws;
     }
+    else {
+        carp("unable to find project definition");
+    }
     return undef;
 }
 
@@ -272,7 +275,7 @@ sub create_project {
     my $pm=$self->get_project_manager();
     my @pids=$pm->list( { "name" => $name, "version" => $version } );
     if(@pids) {
-	carp "project $name $version already exists";
+        carp "project $name $version already exists";
     }
 
     # -- add a new project

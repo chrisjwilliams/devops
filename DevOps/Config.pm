@@ -58,7 +58,7 @@ sub _home {
             $self->{home} = $ENV{HOME};
         }
         else {
-	    require File::HomeDir;
+grequire File::HomeDir;
             $self->{home} = File::HomeDir->my_home;
         }
     }
@@ -98,17 +98,22 @@ sub project_path {
 sub add_project_path {
     my $self=shift;
     my $location=shift;
-    my $dir=shift||die "must supply a directory. usage add_project_path(config_file_location, \@dirs)";
+    my $one_dir=shift||die "must supply a directory. usage add_project_path(config_file_location, \@dirs)";
 
-    my @dirs=@_;
-    unshift @dirs, $dir;
+    my @dirs;
+    foreach my $dir ( ($one_dir, @_) )
+    {
+        if(! -d $dir) {
+            die("directory '$dir' does not exist");
+        }
+	push @dirs, Cwd::realpath($dir);
+    }
 
     # -- store in the required configuration file
     my $file=$self->_config_file($location);
     if( defined $file )
     {
-        foreach my $dir ( @dirs )
-        {
+	foreach my $dir ( @dirs ) {
             if(!$file->itemExists("ProjectPaths", $dir)) {
                 $file->setList("ProjectPaths", $dir);
             }

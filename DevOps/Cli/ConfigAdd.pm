@@ -39,10 +39,11 @@ sub run {
 
     my $config=$self->{parent}->config();
     my $config_loc=$self->{parent}->config_location();
+    $config->add_project_path($config_loc, $dir);
     eval { $config->add_project_path($config_loc, $dir); };
-    if(@_)
+    if($@)
     {
-        return $self->error(@_);
+        return $self->error($@);
     }
     return 0;
 }
