@@ -4,6 +4,7 @@ use DevOps::WorkSpace;
 use DevOps::TestUtils::TestProject;
 use Paf::File::TempDir;
 use Paf::Platform::TestHost;;
+use File::Sync;
 1;
 
 sub new {
@@ -159,8 +160,10 @@ sub test_dependency_persistence {
         @deps=$ws->dependencies();
         die("expecting 2 deps, got ", $#deps + 1), unless($#deps == 1);
     }
+    File::Sync::sync();
 
     # -- test persistency
+    die("expecting workspace dir '$tmpdir' to exist"), unless (-d $tmpdir);
     my $ws=DevOps::WorkSpace->new($tmpdir);
     die("expecting is_constructed() true"), unless ($ws->is_constructed());
 

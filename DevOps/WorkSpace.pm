@@ -90,7 +90,6 @@ sub construct {
 
     $self->{config}->save(); # make sure is_constructed returns true
     $self->{needs_save}=1;
-    $self->{project}=$project;
 }
 
 sub project_id {
