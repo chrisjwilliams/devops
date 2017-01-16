@@ -138,7 +138,6 @@ sub environment {
     my $workspace=shift;
     my $name=shift;
     my $namespace=shift||1;
-
     my $env=$workspace->environment($name);
     foreach my $dep ( $workspace->dependencies() )
     {
@@ -163,11 +162,16 @@ sub get_workspace_from_location {
     my $self=shift;
     my $location=shift || die "expecting a location";
 
-    if( -d $location ) {
-        my $workspace=new DevOps::WorkSpace($location);
-        return $self->_add_workspace($workspace);
+    if(! defined $self->{workspaces_by_loc}{$location}) {
+        if( -d $location ) {
+            my $workspace=new DevOps::WorkSpace($location);
+            $self->_add_workspace($workspace);
+        }
+        else {
+            return undef;
+        }
     }
-    return undef;
+    return $self->{workspaces_by_loc}{$location};
 }
     
 # -- private methods -------------------------
@@ -191,6 +195,7 @@ sub _add_workspace {
     if( ! defined $self->{ws}{$key} ) {
         $self->{ws}{$key}=$ws;
         $self->{locations}{$key}=$ws->location();
+        $self->{workspaces_by_loc}{$ws->location()} = $ws;
     }
     return $self->{ws}{$key};
 }
