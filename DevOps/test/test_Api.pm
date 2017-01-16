@@ -6,6 +6,7 @@ use DevOps::Api;
 use DevOps::Dependency;
 use FileHandle;
 use File::Sync qw(sync);
+use File::Path qw(mkpath);
 use Paf::File::TempDir;
 use Paf::Platform::TestHost;
 1;
@@ -39,7 +40,7 @@ sub config {
     my $dir=(new Paf::File::TempDir($self->{tmpdir}->dir(), 0))->dir();
     $config->set_project_path($dir);
     my $workspace_dir=$dir."/workspaces";
-    mkdir $workspace_dir or die "unable to make $workspace_dir : $!";
+    mkpath($workspace_dir) or die "unable to make $workspace_dir : $!";
     $config->set_workspace_dir($workspace_dir);
     $config->workspace_manager_data($dir."/workspace.db");
     return $config;
