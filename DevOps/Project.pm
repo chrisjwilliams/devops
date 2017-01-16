@@ -158,6 +158,7 @@ sub task_code {
     my $workflow=shift || carp ("workflow name unspecified");
     my $task_name=shift || carp ("task_name unspecified");
     my $env=shift||DevOps::Environment->new();
+    carp("env is not an environment") if ref($env) ne 'DevOps::Environment';
     my $platform=shift; # optional - use undef
     my $variant=shift;  # optional - use undef
     my $verbose=shift||0;
@@ -260,7 +261,7 @@ sub _variant_sections {
 
     my @list=( new Paf::Configuration::NodeFilter($base) );
     my @outer_list=( {} );
-    if( defined $platform ) {
+    if( defined $platform && defined $platform->arch()) {
         my $filter=new Paf::Configuration::NodeFilter($base, { arch => $platform->arch() });
         push @outer_list, $filter->meta();
         unshift @list, $filter; 

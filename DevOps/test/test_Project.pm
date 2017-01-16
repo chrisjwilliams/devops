@@ -181,6 +181,6 @@ sub test_task_code {
     @saved_code=$project->task_code($workflow, $task_name, undef, undef, undef);
     die("expecting @code, got @saved_code"), unless ("@code" eq "@saved_code" );
 
-    @saved_code=$project->task_code($workflow, $task_name, $platform, { type => [ qw( debug profiled ) ] } );
+    @saved_code=$project->task_code($workflow, $task_name, undef, $platform, { type => [ qw( debug profiled ) ] } );
     die("expecting @specialized_code, got @saved_code"), unless ("@specialized_code" eq "@saved_code" );
 }
