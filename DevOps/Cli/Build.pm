@@ -44,11 +44,6 @@ sub synopsis {
 sub run {
     my $self=shift;
 
-    $self->{variants} = { toolchain => [ $self->{toolchain}->toolchain() ] };
-    if( @_ ) {
-        $self->{variants}{extra_params}{setup} = [ @_ ];
-    }
-
     my $ws=$self->current_workspace();
     if( ! $ws ) {
         # -- maybe the arguments specify the project to build
@@ -62,6 +57,11 @@ sub run {
         }
     }
     if( $ws ) {
+        $self->{variants} = { toolchain => [ $self->{toolchain}->toolchain() ] };
+        if( @_ ) {
+            $self->{variants}{extra_params}{setup} = [ @_ ];
+        }
+
         # -- parse the command line arguments
         my $report=$self->{api}->build_workspace($ws, [ @_ ], undef, $self->{variants}, $self->verbose_level());
         if( $self->verbose_level() ) {
