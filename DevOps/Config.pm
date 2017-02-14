@@ -58,7 +58,7 @@ sub _home {
             $self->{home} = $ENV{HOME};
         }
         else {
-grequire File::HomeDir;
+            require File::HomeDir;
             $self->{home} = File::HomeDir->my_home;
         }
     }
