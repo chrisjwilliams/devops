@@ -18,5 +18,8 @@ Most ideas come from the original SCRAM tool I wrote for large distributed devel
 (see http://www.drdobbs.com/programmers-toolchest/184404570#), with other bits and pieces from other
 projects I've worked on since.
 
+## Installation
+See the Installation guide in Installation/README
+
 ## Getting Started
 Coming soon

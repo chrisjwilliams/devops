@@ -1,4 +1,4 @@
-#!/usr/bin/perl -I ../.. -I ../../Externals/paf -w
+#!/usr/bin/perl -w
 #
 # Perl tester executable example
 # Will pick up tests defined in any modules of the form
@@ -6,9 +6,14 @@
 # each module must have a tests() method to instruct the launcher
 # of the methods to call for each test
 #
+use FindBin;
+use lib "$FindBin::RealBin/../..";
+use lib "$FindBin::RealBin/../../Externals/paf";
+
 use strict;
 use Cwd;
 use Paf::TestSuite::TestLaunch;
 
-my $tests=Paf::TestSuite::TestLaunch->new(getcwd());
+#my $tests=Paf::TestSuite::TestLaunch->new(getcwd());
+my $tests=Paf::TestSuite::TestLaunch->new($FindBin::RealBin);
 exit $tests->run(@ARGV);
