@@ -23,7 +23,7 @@ sub new {
 }
 
 sub tests {
-    return qw(test_import test_list_empty_pm test_duplicate_ids);
+    return qw(test_import test_list_empty_pm test_list_specific_id test_duplicate_ids);
 }
 
 sub test_import {
@@ -34,6 +34,28 @@ sub test_list_empty_pm {
     my $self=shift;
     my $pm=DevOps::ProjectManager->new($self->{config});
     die ("expecting no entries , got ", $self->print_projects()), if($pm->list());
+}
+
+sub test_list_specific_id {
+    my $self=shift;
+
+    # setup a store and add a project
+    my $loc1=Paf::File::TempDir->new();
+    my $f1 = new Paf::DataStore::DirStore($loc1->dir(), ("name", "version"));
+
+    my $id={ name => $self->{testproject_1_name}, 
+             version => $self->{testproject_1_version}
+           };
+    $f1->add($id, undef);
+
+    # create a ProjectManager and add the store
+    my $path=Paf::File::SearchPath->new();
+    my $pm=DevOps::ProjectManager->new($path);
+    $pm->add_store($f1);
+
+    my $uid1=$pm->list($id);
+    my $uid2=$pm->list($id);
+    die ("expecting id to be the same, got '$uid1' '$uid2'" ), if ($uid1 != $uid2);
 }
 
 sub test_duplicate_ids {
