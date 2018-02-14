@@ -21,9 +21,11 @@ sub test_new {
 
     my $uid=Paf::DataStore::Uid->new("test_store_id", { name => "name", version => "version"} );
     my $uid_string=$uid->serialize();
+    my $uid3=Paf::DataStore::Uid->new("test_store_id", { name => "name", version => "version"} );
 
     my $id1=DevOps::ProjectId->new($uid);
     my $id2=DevOps::ProjectId->new($uid_string);
+    my $id3=DevOps::ProjectId->new($uid3);
 
     die "expecting name", if ($id1->name() ne "name");
     die "expecting version", if ($id1->version() ne "version");
@@ -33,4 +35,5 @@ sub test_new {
 
     die "match() failed", if ( ! $id1->match($id2) );
     die "match() failed", if ( ! $id2->match($id1) );
+    die "match() failed", if ( ! $id1->match($id3) );
 }
