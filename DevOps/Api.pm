@@ -78,8 +78,54 @@ sub get_workspace_manager
     return $self->{wm};
 }
 
-# ------------- Application Functional Methods ---------------------------
+sub runtime_environment {
+    my $self=shift;
+    my $workspace=shift || carp "expecting workspace";
+    my $platform=shift || $self->_localhost();
+    my $variants=shift || {};
 
+    my $runtime=$workspace->environment("runtime");
+    my $wm=$self->get_workspace_manager();
+
+    if( ! defined $variants->{type} ) {
+        $variants->{type}=[ "release" ];
+    }
+    else {
+        foreach my $elem ( @{$variants->{type}} ) {
+            die("build type $elem not defined"), unless( grep($elem, $workspace->build_types()) );
+        }
+    }
+
+    my $build_area=$workspace->build_out($platform, $variants);
+    my $env=$build_area->env();
+
+    # -- get dependents build environments
+    foreach my $dep ( $workspace->dependencies() ) {
+        if( defined (my $loc=$workspace->workspace_dependency($dep)) ) {
+            # -- find the appropriate build area environment
+            my $dep_ws=$wm->get_workspace_from_location($loc);
+            if( !defined $dep_ws ) {
+                die "unable to find workspace at $loc\n";
+            }
+            my $dep_build_out=$dep_ws->search_build_out($platform, $variants);
+            my $dep_runtime=$dep_ws->environment("runtime");
+            if( defined $dep_build_out ) {
+                $dep_runtime->expand($dep_build_out->env());
+                $runtime->merge_namespace( [ $dep->name(), $dep->version()], $dep_build_out->env());
+                $runtime->merge_namespace( [ $dep->name() ], $dep_build_out->env());
+            }
+            $runtime->merge($dep_runtime);
+        }
+    }
+    #$runtime->merge_namespace( [ "platform" ], new DevOps::Environment($platform->environment()) );
+    $runtime->merge($self->get_environment($workspace, "export", $platform));
+    $runtime->expand($env);
+    $runtime->merge($env);
+
+    return $runtime;
+}
+
+# ------------- Application Functional Methods ---------------------------
 sub build_workspace {
     my $self=shift;
     my $workspace=shift || carp "expecting workspace";
@@ -103,34 +149,9 @@ sub build_workspace {
 
     # -- create the local build area
     my $build_area=$workspace->build_out($platform, $variants);
-    my $env=$build_area->env();
-    $env->set("src_dir", $workspace->checkout_dir());
-    $env->set("version", $workspace->version());
-
-    my $runtime=$workspace->environment("runtime");
-
-    # -- get dependents build environments
-    foreach my $dep ( $workspace->dependencies() ) {
-        if( defined (my $loc=$workspace->workspace_dependency($dep)) ) {
-            # -- find the appropriate build area environment
-            my $dep_ws=$wm->get_workspace_from_location($loc);
-            if( !defined $dep_ws ) {
-                die "unable to find workspace at $loc\n";
-            }
-            my $dep_build_out=$dep_ws->search_build_out($platform, $variants);
-            my $dep_runtime=$dep_ws->environment("runtime");
-            if( defined $dep_build_out ) {
-                $dep_runtime->expand($dep_build_out->env());
-                $env->merge_namespace( [ $dep->name(), $dep->version()], $dep_build_out->env());
-                $env->merge_namespace( [ $dep->name() ], $dep_build_out->env());
-            }
-            $runtime->merge($dep_runtime);
-        }
-    }
-
-    $env->merge($self->get_environment($workspace, "export", $platform));
-    #$env->merge_namespace( [ "platform" ], new DevOps::Environment($platform->environment()) );
-    print $env->dump(), "\n", if( $verbose > 1 );
+    my $runtime=$self->runtime_environment($workspace, $platform, $variants);
+    $runtime->set("src_dir", $workspace->checkout_dir());
+    $runtime->set("version", $workspace->version());
 
     # -- build a task list
     my $stop_task;
@@ -149,7 +170,6 @@ sub build_workspace {
     require Paf::Platform::Task;
     my $task_series=Paf::Platform::TaskSeries->new();
 
-    $runtime->expand($env);
     if( $verbose > 1 ) {
         print "runtime:\n";
         print $runtime->dump(\*STDOUT), "\n";
@@ -160,7 +180,7 @@ sub build_workspace {
         $task->runtime_environment($runtime->env());
         foreach my $line ( $workspace->build_commands($task_name, $platform, $variants, $verbose) ) {
             print "task $task_name: ",$line, "\n", if( $verbose > 2 );
-            $line=$env->expandString($line);
+            $line=$runtime->expandString($line);
             print "task $task_name: ",$line, "\n", if( $verbose > 1 );
             $task->add($line);
         }

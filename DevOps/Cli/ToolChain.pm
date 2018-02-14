@@ -35,7 +35,7 @@ sub help {
 }
 
 sub synopsis {
-    return "tool <tool_namea override the default toolchain used to set the install directory>";
+    return "tool <tool_name> override the default toolchain";
 }
 
 sub run {

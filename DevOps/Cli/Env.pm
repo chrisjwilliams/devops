@@ -17,9 +17,15 @@ use strict;
 # -- initialisation
 
 sub new {
-	my $class=shift;
-	my $self=$class->SUPER::new(@_);
-	return $self;
+    my $class=shift;
+    my $self=$class->SUPER::new(@_);
+
+    $self->{toolchain}=DevOps::Cli::ToolChain->new();
+    $self->add_argument(new Paf::Cli::OptionalArgument("project_name", "specify the name of the project"));
+    $self->add_argument(new Paf::Cli::OptionalArgument("project_version", "specify the version of the project"));
+    $self->add_argument(new Paf::Cli::OptionalArgument("build_type", "default release"));
+    $self->add_options($self->{toolchain});
+    return $self;
 }
 
 sub name {
@@ -27,22 +33,34 @@ sub name {
 }
 
 sub synopsis {
-    return "print out the current working area environment"
+    return "print out the current working area environment, or the environment for the project specified"
 }
 
 sub run {
     my $self=shift;
-    my @names=@_;
-    if (!defined $names[0]) {
-        push @names, "runtime", "build";
-    }
-    
     my $ws=$self->current_workspace();
-    if( defined $ws ) {
-        foreach my $name ( @names ) {
-            my $env=$self->{api}->get_environment($ws, $name);
-            $env->dump();
+    if( ! $ws ) {
+        # -- no workspace so the arguments should specify the project to build
+        my $name=shift;
+        my $version=shift;
+        if( $name && $version ) {
+            ($ws)=$self->{api}->find_workspaces($name, $version);
+            if( ! $ws ) {
+                return $self->error("unable to find workspace for project '$name' version '$version'");
+            }
         }
+    }
+    my @names=@_;
+    my $variants = { toolchain => [ $self->{toolchain}->toolchain() ] };
+    if (!defined $names[0]) {
+        # default build flavours
+        push @names, "release";
+    }
+    $variants->{type}=\@names;
+    
+    if( defined $ws ) {
+        my $env=$self->{api}->runtime_environment($ws, undef, $variants );
+        $env->dump();
     }
     else {
         return $self->error("no project has been selected");

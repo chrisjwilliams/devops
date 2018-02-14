@@ -226,15 +226,14 @@ sub build_tasks {
     return @{$self->{task_list}{build}};
 }
 
-sub build_commands {
+sub task_environment {
     my $self=shift;
+    my $workflow=shift;
     my $task_name=shift || carp ("task_name unspecified");
     my $platform=shift; # optional - use undef
 
-    my $workflow="build";
-    
-    # -- deduce evironments for each resolved dependency
     my @filters=();
+    # -- deduce environments specific to each resolved dependency
     foreach my $dep ( $self->resolved_dependencies() ) {
         if( defined $platform ) {
             push @filters, new Paf::Configuration::NodeFilter("environment", { arch => $platform->arch(), dependency => $dep->name(), version => $dep->version() });
@@ -243,8 +242,16 @@ sub build_commands {
         push @filters, new Paf::Configuration::NodeFilter("environment", { dependency => $dep->name(), version => $dep->version() });
         push @filters, new Paf::Configuration::NodeFilter("environment", { dependency => $dep->name() });
     }
-    my $env=$self->project()->task_environment( $workflow, $task_name, @filters);
+    return $self->project()->task_environment( $workflow, $task_name, @filters);
+}
 
+sub build_commands {
+    my $self=shift;
+    my $task_name=shift || carp ("task_name unspecified");
+    my $platform=shift; # optional - use undef
+
+    my $workflow="build";
+    my $env=$self->task_environment( $workflow, $task_name, $platform);
     return $self->project()->task_code($workflow, $task_name, $env, $platform, @_);
 }
 
