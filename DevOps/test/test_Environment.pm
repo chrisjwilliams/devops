@@ -18,7 +18,7 @@ sub new {
 }
 
 sub tests {
-    return qw( test_size test_remove test_expand test_merge test_self_refering_variable);
+    return qw( test_size test_remove test_expand test_merge test_var test_self_refering_variable test_remove_empty_variables_from_string);
 }
 
 sub test_size {
@@ -97,6 +97,30 @@ sub test_self_refering_variable {
     my $env=$self->_initEnv();
     $env->set("some_var", 'abc${some_var}');
     die("unexpected value"), unless $env->var("some_var") eq 'abc${some_var}';
+}
+
+sub test_var {
+    my $self=shift;
+    my $env=$self->_initEnv();
+    die("unexpected value"), unless $env->var("a") eq "1";
+    my $subenv=DevOps::Environment->new( { "another_var" => "avvalue" } );
+    $env->add($subenv);
+    die("unexpected value"), unless $env->var("a") eq "1";
+    die("unexpected value"), unless $env->var("another_var") eq "avvalue";
+}
+
+sub test_remove_empty_variables_from_string {
+    my $self=shift;
+    my $env=$self->_initEnv();
+    $env->set("some_var", 'abc');
+    my $string="a string with a) \${an_undefined} variable, b) \${another_undefined_var}, c) \${some_var}"; 
+    my $sstring=$env->removeUndefined($string, $env);
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) , c) \${some_var}";
+
+    my $subenv=DevOps::Environment->new( { "another_undefined_var" => "fred" } );
+    $env->add($subenv);
+    $sstring=$env->removeUndefined($string, $env);
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) \${another_undefined_var}, c) \${some_var}";
 }
 
 sub test_merge {

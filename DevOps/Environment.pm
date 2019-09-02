@@ -16,6 +16,7 @@
 #                        use $$ to escape the $ identifier
 # merge(hashref|Environment) : merge in the data, exisitng variables are not overriden. Namespaces are ignored.
 # remove(hashref|Environment) : remove the variables specified in the provided Environment
+# removeUndefined(string)     : remove any undefined variables from the string
 # set(var,value) : set a single variable
 # size() : return the number of variables
 # var(name) : return the value of the specified variable
@@ -94,6 +95,34 @@ sub var {
         }
     }
     return undef;
+}
+
+sub removeUndefined {
+    my $self=shift;
+    my $string=shift;
+
+    if( not defined $string ) {
+        return $string;
+    }
+
+    my @ns;
+    if(@_) {
+        @ns=@_;
+    }
+    else {
+        @ns=@{$self->{ns}};
+    }
+   if( $string=~/(.*?)\$\{(.*?)\}(.*(\n?))/g ) {
+        my $f1=$1;
+        my $f2=$2; 
+        if(defined $self->var($f2)) {
+            $string=$f1."\${$f2\}".($self->removeUndefined($3));
+        }
+        else {
+            $string=$f1.($self->removeUndefined($3));
+        }
+    }
+    return $string;
 }
 
 sub set {
