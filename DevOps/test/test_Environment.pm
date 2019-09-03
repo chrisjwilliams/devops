@@ -113,14 +113,14 @@ sub test_remove_empty_variables_from_string {
     my $self=shift;
     my $env=$self->_initEnv();
     $env->set("some_var", 'abc');
-    my $string="a string with a) \${an_undefined} variable, b) \${another_undefined_var}, c) \${some_var}"; 
+    my $string="a string with a) \${an_undefined} variable, b) \${another_undefined_var}, c) \${some_var} \${c++}";
     my $sstring=$env->removeUndefined($string, $env);
-    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) , c) \${some_var}";
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) , c) \${some_var} \${c++}";
 
     my $subenv=DevOps::Environment->new( { "another_undefined_var" => "fred" } );
     $env->add($subenv);
     $sstring=$env->removeUndefined($string, $env);
-    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) \${another_undefined_var}, c) \${some_var}";
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) \${another_undefined_var}, c) \${some_var} \${c++}";
 }
 
 sub test_merge {

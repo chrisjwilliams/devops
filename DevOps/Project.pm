@@ -191,6 +191,7 @@ sub task_code {
         my $action=$actions[0];
         foreach my $line ( @{$action->content()} ) {
             my $exline=$env->expandString($line);
+            $exline=$env->removeUndefined($exline);
             push @code, $exline;
         }
         return @code;

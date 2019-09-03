@@ -115,7 +115,7 @@ sub removeUndefined {
    if( $string=~/(.*?)\$\{(.*?)\}(.*(\n?))/g ) {
         my $f1=$1;
         my $f2=$2; 
-        if(defined $self->var($f2)) {
+        if(defined $self->var($f2) || defined $ENV{$f2} ) {
             $string=$f1."\${$f2\}".($self->removeUndefined($3));
         }
         else {
