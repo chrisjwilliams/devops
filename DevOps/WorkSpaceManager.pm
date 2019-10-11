@@ -60,7 +60,7 @@ sub get_workspace
     {
         if(! -d $location ) {
             # ---- corrupted database - fix it -----
-	    print "removing corrupted entry", $location;
+            print "removing corrupted entry", $location;
             $self->remove_entry($project_id);
         }
         else
@@ -89,10 +89,9 @@ sub construct_workspace
     }
     my $workspace=new DevOps::WorkSpace($location);
     $workspace->construct($project);
-    $self->{ws}{$key}=$workspace;
-    $self->{locations}{$key}=$location;
+    my $ws=$self->_add_workspace($workspace);
     $self->_save();
-    return $workspace;
+    return $ws;
 }
 
 sub remove_entry 
