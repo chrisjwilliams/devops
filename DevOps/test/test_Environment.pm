@@ -113,18 +113,29 @@ sub test_remove_empty_variables_from_string {
     my $self=shift;
     my $env=$self->_initEnv();
     $env->set("some_var", 'abc');
-    my $string="a string with a) \${an_undefined} variable, b) \${another_undefined_var}, c) \${some_var} \${c++}";
-    my $sstring=$env->removeUndefined($string, $env);
-    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) , c) \${some_var} \${c++}";
+    my $string="a string with a) \${an_undefined} variable, b) \${another_undefined_var}, c) \${some_var} \${c++} \${namespace1::test_var}";
 
+    # -- defined in environment
+    my $sstring=$env->removeUndefined($string, $env);
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) , c) \${some_var} \${c++} ";
+
+    # -- defined in sub-environment without a namespace
     my $subenv=DevOps::Environment->new( { "another_undefined_var" => "fred" } );
     $env->add($subenv);
     $sstring=$env->removeUndefined($string, $env);
-    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) \${another_undefined_var}, c) \${some_var} \${c++}";
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) \${another_undefined_var}, c) \${some_var} \${c++} ";
 
+    # -- defined in sub-environment with a namespace
+    my $subenv_ns=DevOps::Environment->new( { "test_var" => "bar" } );
+    $subenv_ns->namespace("namespace1");
+    $env->add($subenv_ns);
+    $sstring=$env->removeUndefined($string, $env);
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) \${another_undefined_var}, c) \${some_var} \${c++} \${namespace1::test_var}";
+
+    # -- defined in environment vars
     $ENV{"an_undefined"} = "env_value";
     $sstring=$env->removeUndefined($string, $env);
-    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a) \${an_undefined} variable, b) \${another_undefined_var}, c) \${some_var} \${c++}";
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a) \${an_undefined} variable, b) \${another_undefined_var}, c) \${some_var} \${c++} \${namespace1::test_var}";
 }
 
 sub test_merge {

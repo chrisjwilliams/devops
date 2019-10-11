@@ -178,8 +178,6 @@ sub task_code {
     #    }
     #}
 
-    print "task $workflow:$task_name environment:\n", $env->dump(), "\n", if( $verbose > 1 );
-
     foreach my $filter ( $self->_variant_sections("code", $platform, $variant) )
     {
         my @actions=$task_node->search($filter);
@@ -191,7 +189,6 @@ sub task_code {
         my $action=$actions[0];
         foreach my $line ( @{$action->content()} ) {
             my $exline=$env->expandString($line);
-            $exline=$env->removeUndefined($exline);
             push @code, $exline;
         }
         return @code;

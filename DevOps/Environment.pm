@@ -105,13 +105,6 @@ sub removeUndefined {
         return $string;
     }
 
-    my @ns;
-    if(@_) {
-        @ns=@_;
-    }
-    else {
-        @ns=@{$self->{ns}};
-    }
    if( $string=~/(.*?)\$\{(.*?)\}(.*(\n?))/g ) {
         my $f1=$1;
         my $f2=$2; 

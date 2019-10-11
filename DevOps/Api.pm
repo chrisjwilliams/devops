@@ -181,6 +181,7 @@ sub build_workspace {
         foreach my $line ( $workspace->build_commands($task_name, $platform, $variants, $verbose) ) {
             print "task $task_name: ",$line, "\n", if( $verbose > 2 );
             $line=$runtime->expandString($line);
+            $line=$runtime->removeUndefined($line);
             print "task $task_name: ",$line, "\n", if( $verbose > 1 );
             $task->add($line);
         }
