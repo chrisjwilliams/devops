@@ -121,6 +121,10 @@ sub test_remove_empty_variables_from_string {
     $env->add($subenv);
     $sstring=$env->removeUndefined($string, $env);
     die("unexpected value \"$sstring\""), unless $sstring eq "a string with a)  variable, b) \${another_undefined_var}, c) \${some_var} \${c++}";
+
+    $ENV{"an_undefined"} = "env_value";
+    $sstring=$env->removeUndefined($string, $env);
+    die("unexpected value \"$sstring\""), unless $sstring eq "a string with a) \${an_undefined} variable, b) \${another_undefined_var}, c) \${some_var} \${c++}";
 }
 
 sub test_merge {
