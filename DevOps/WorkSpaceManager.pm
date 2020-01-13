@@ -66,7 +66,7 @@ sub get_workspace
         else
         {
             # ---- return the pre-exisitng object
-            return $self->_add_workspace(new DevOps::WorkSpace($location));
+            return $self->_add_workspace(new DevOps::WorkSpace($location), $key);
         }
     }
     return undef;
@@ -89,7 +89,7 @@ sub construct_workspace
     }
     my $workspace=new DevOps::WorkSpace($location);
     $workspace->construct($project);
-    my $ws=$self->_add_workspace($workspace);
+    my $ws=$self->_add_workspace($workspace, $key);
     $self->_save();
     return $ws;
 }
@@ -189,8 +189,12 @@ sub _read {
 sub _add_workspace {
     my $self=shift;
     my $ws=shift;
+    my $key=shift;
 
-    my $key=$ws->project_id()->serialize();
+    if( ! defined $key ) {
+        $key = $ws->project_id()->serialize();
+    }
+
     if( ! defined $self->{ws}{$key} ) {
         $self->{ws}{$key}=$ws;
         $self->{locations}{$key}=$ws->location();

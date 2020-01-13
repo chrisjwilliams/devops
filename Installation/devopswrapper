@@ -5,10 +5,15 @@
 
 $re='false';
 @args=@ARGV;
+my @perl_args;
 for ( my $i=0; $i<=$#args; $i++ ) {
    if ( $args[$i] eq "-re" ) { #Always request a User Return to exit the program
 	$re="true";
 	# cut it out of argument list passed down
+	splice(@args,$i,1);
+   }
+   elsif ( $args[$i] eq "-d" ) {
+        push @perl_args, "-d";
 	splice(@args,$i,1);
    }
 }
@@ -23,7 +28,8 @@ if ( $ENV{DEVOPSPERL} eq "" ) {
  $ENV{DEVOPSPERL}='__perlexe__';
 }
 
-my $ret=system("$ENV{DEVOPSPERL}",$ENV{DEVOPS_HOME}.'/Scripts/devops', @args);
+push @perl_args, $ENV{DEVOPS_HOME}.'/Scripts/devops';
+my $ret=system("$ENV{DEVOPSPERL}", @perl_args , @args);
 
 # -- Dont just exit- ask the user first if -re option specified
 if ( $re eq 'true' ) {
